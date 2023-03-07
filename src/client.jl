@@ -35,23 +35,25 @@ end
 
 #----------------------------------- Common vehicle APIs ---------------------------------------------
 
-function reset(c::VehicleClient)::Nothing
-    """
+"""
         reset(c::VehicleClient)
     
     Reset the vehicle to its original starting state
 
     Note that you must call `enableApiControl` and `armDisarm` again after the call to reset
     """
+function reset(c::VehicleClient)::Nothing
+    
     call(c, "reset")
 end
 
-function ping(::VehicleClient)::Bool
-    """
-        ping(::VehicleClient)
+"""
+        ping(c::VehicleClient)
 
     If connection is established then this call will return true otherwise it will be blocked until timeout
     """
+function ping(c::VehicleClient)::Bool
+    
     call(c, "ping")
 end
 
@@ -67,14 +69,15 @@ function getMinRequiredServerVersion(c::VehicleClient)
     return 1 # sync with C++ client
 end
 
-function getMinRequiredClientVersion(c::VehicleClient)
-    """
+"""
     Enables || disables API control for vehicle corresponding to vehicle_name
 
     Args:
         is_enabled (bool) True to enable, false to disable API control
         vehicle_name (str, optional) Name of the vehicle to send this command to
         """
+function getMinRequiredClientVersion(c::VehicleClient)
+    
     return call(c, "getMinRequiredClientVersion")
 end
 
@@ -83,8 +86,7 @@ function enableApiControl(c::VehicleClient, is_enabled::Bool, vehicle_name::Stri
     call(c, "enableApiControl", is_enabled, vehicle_name)
 end
 
-function isApiControlEnabled(c::VehicleClient, vehicle_name::String="")
-    """
+"""
     Returns true if API control is established.
 
     If false (which is functionault) then API calls would be ignored. After a successful call to `enableApiControl`, `isApiControlEnabled` should return true.
@@ -95,11 +97,12 @@ function isApiControlEnabled(c::VehicleClient, vehicle_name::String="")
     Returns:
         bool: If API control is enabled
     """
+function isApiControlEnabled(c::VehicleClient, vehicle_name::String="")
+    
     call(c, "isApiControlEnabled", vehicle_name)
 end
 
-function armDisarm(c::VehicleClient, arm::Bool, vehicle_name::String="")
-    """
+"""
     Arms || disarms vehicle
 
     Args:
@@ -109,51 +112,56 @@ function armDisarm(c::VehicleClient, arm::Bool, vehicle_name::String="")
     Returns:
         bool: Success
     """
+function armDisarm(c::VehicleClient, arm::Bool, vehicle_name::String="")
+    
     return call(c, "armDisarm", arm, vehicle_name)
 end
 
-function simPause(c::VehicleClient, is_paused::Bool)
-    """
+"""
     Pauses simulation
 
     Args:
         is_paused (bool) True to pause the simulation, false to release
     """
+function simPause(c::VehicleClient, is_paused::Bool)
+    
     call(c, "simPause", is_paused)
 end
 
-function simIsPause(c::VehicleClient)
-    """
+"""
     Returns true if the simulation is paused
 
     Returns:
         bool: If the simulation is paused
     """
+function simIsPause(c::VehicleClient)
+    
     return call(c, "simIsPaused")
 end
 
-function simContinueForTime(c::VehicleClient, seconds::Real)
-    """
+"""
     Continue the simulation for the specified number of seconds
 
     Args:
         seconds (float) Time to run the simulation for
     """
+function simContinueForTime(c::VehicleClient, seconds::Real)
+    
     call(c, "simContinueForTime", seconds)
 end
 
-function simContinueForFrames(c::VehicleClient, frames)
-    """
+"""
     Continue (or resume if paused) the simulation for the specified number of frames, after which the simulation will be paused.
 
     Args:
         frames (int) Frames to run the simulation for
     """
+function simContinueForFrames(c::VehicleClient, frames)
+    
     call(c, "simContinueForFrames", frames)
 end
 
-function getHomeGeoPoint(c::VehicleClient, vehicle_name="")
-    """
+"""
     Get the Home location of the vehicle
 
     Args:
@@ -162,15 +170,18 @@ function getHomeGeoPoint(c::VehicleClient, vehicle_name="")
     Returns:
         GeoPoint: Home location of the vehicle
     """
+function getHomeGeoPoint(c::VehicleClient, vehicle_name="")
+    
     msg = call(c, "getHomeGeoPoint", vehicle_name)
     return MsgPack.from_msgpack(GeoPoint, msg)
 end
 
 
-function confirmConnection(c::VehicleClient)
-    """
+"""
     Checks state of connection every 1 sec and reports it in Console so user can see the progress for connection.
     """
+function confirmConnection(c::VehicleClient)
+    
     if ping(c)
         println("Connected!")
     else
@@ -195,8 +206,7 @@ function confirmConnection(c::VehicleClient)
     println("")
 end
 
-function simSetLightIntensity(c::VehicleClient, light_name::String, intensity::Real)
-    """
+"""
     Change intensity of named light
 
     Args:
@@ -206,11 +216,12 @@ function simSetLightIntensity(c::VehicleClient, light_name::String, intensity::R
     Returns:
         bool: True if successful, otherwise false
     """
+function simSetLightIntensity(c::VehicleClient, light_name::String, intensity::Real)
+    
     return call(c, "simSetLightIntensity", light_name, intensity)
 end
 
-function simSwapTextures(c::VehicleClient, tags, tex_id=0, component_id=0, material_id=0)
-    """
+"""
     Runtime Swap Texture API
 
     See https://microsoft.github.io/AirSim/retexturing/ for details
@@ -226,11 +237,12 @@ function simSwapTextures(c::VehicleClient, tags, tex_id=0, component_id=0, mater
     Returns:
         list[str]: List of objects which matched the provided tags and had the texture swap perfomed
     """
+function simSwapTextures(c::VehicleClient, tags, tex_id=0, component_id=0, material_id=0)
+    
     return call(c, "simSwapTextures", tags, tex_id, component_id, material_id)
 end
 
-function simSetObjectMaterial(c::VehicleClient, object_name, material_name, component_id=0)
-    """
+"""
     Runtime Swap Texture API
     See https://microsoft.github.io/AirSim/retexturing/ for details
     Args:
@@ -241,11 +253,12 @@ function simSetObjectMaterial(c::VehicleClient, object_name, material_name, comp
     Returns:
         bool: True if material was set
     """
+function simSetObjectMaterial(c::VehicleClient, object_name, material_name, component_id=0)
+    
     return call(c, "simSetObjectMaterial", object_name, material_name, component_id)
 end
 
-function simSetObjectMaterialFromTexture(c::VehicleClient, object_name, texture_path, component_id=0)
-    """
+"""
     Runtime Swap Texture API
     See https://microsoft.github.io/AirSim/retexturing/ for details
     Args:
@@ -256,13 +269,14 @@ function simSetObjectMaterialFromTexture(c::VehicleClient, object_name, texture_
     Returns:
         bool: True if material was set
     """
+function simSetObjectMaterialFromTexture(c::VehicleClient, object_name, texture_path, component_id=0)
+    
     return call(c, "simSetObjectMaterialFromTexture", object_name, texture_path, component_id)
 end
 
 # time-of-day control
 #time - of - day control
-function simSetTimeOfDay(c::VehicleClient, is_enabled::Bool, start_datetime::String="", is_start_datetime_dst::Bool=false, celestial_clock_speed::Int=1, update_interval_secs::Int=60, move_sun::Bool=true)
-    """
+"""
     Control the position of Sun in the environment
 
     Sun's position is computed using the coordinates specified in `OriginGeopoint` in settings for the date-time specified in the argument,
@@ -278,36 +292,39 @@ function simSetTimeOfDay(c::VehicleClient, is_enabled::Bool, start_datetime::Str
         update_interval_secs (float, optional) Interval to update the Sun's position
         move_sun (bool, optional) Whether || not to move the Sun
     """
+function simSetTimeOfDay(c::VehicleClient, is_enabled::Bool, start_datetime::String="", is_start_datetime_dst::Bool=false, celestial_clock_speed::Int=1, update_interval_secs::Int=60, move_sun::Bool=true)
+    
     call(c, "simSetTimeOfDay", is_enabled, start_datetime, is_start_datetime_dst, celestial_clock_speed, update_interval_secs, move_sun)
 end
 
 #weather
-function simEnableWeather(c::VehicleClient, enable::Bool)
-    """
+"""
     Enable Weather effects. Needs to be called before using `simSetWeatherParameter` API
 
     Args:
         enable (bool) True to enable, false to disable
     """
+function simEnableWeather(c::VehicleClient, enable::Bool)
+    
     call(c, "simEnableWeather", enable)
 end
 
-function simSetWeatherParameter(c::VehicleClient, param, val::Real)
-    """
+"""
     Enable various weather effects
 
     Args:
         param (WeatherParameter) Weather effect to be enabled
         val (float) Intensity of the effect, Range 0-1
     """
+function simSetWeatherParameter(c::VehicleClient, param, val::Real)
+    
     call(c, "simSetWeatherParameter", param, val)
 end
 
 #camera control
 #simGetImage returns compressed png in array of bytes
 #image_type uses one of the ImageType members
-function simGetImage(c::VehicleClient, camera_name::Union{String,Int}, image_type::ImageType, vehicle_name::String="", external::Bool=false)
-    """
+"""
     Get a single image
     Returns bytes of png format image which can be dumped into abinary file to create .png image
     `string_to_uint8_array()` can be used to convert into Numpy unit8 array
@@ -320,6 +337,8 @@ function simGetImage(c::VehicleClient, camera_name::Union{String,Int}, image_typ
     Returns:
         Binary string literal of compressed png image
     """
+function simGetImage(c::VehicleClient, camera_name::Union{String,Int}, image_type::ImageType, vehicle_name::String="", external::Bool=false)
+    
 
     #because this method returns std::vector < uint8>, msgpack decides to encode it as a string unfortunately.
     result = call(c, "simGetImage", camera_name, image_type.property, vehicle_name, external)
@@ -333,8 +352,7 @@ end
 #camera control
 #simGetImage returns compressed png in array of bytes
 #image_type uses one of the ImageType members
-function simGetImages(c::VehicleClient, requests::Vector{ImageRequest}, vehicle_name::String="", external::Bool=false)
-    """
+"""
     Get multiple images
 
     See https://microsoft.github.io/AirSim/image_apis/ for details and examples
@@ -347,6 +365,8 @@ function simGetImages(c::VehicleClient, requests::Vector{ImageRequest}, vehicle_
     Returns:
         list[ImageResponse]:
     """
+function simGetImages(c::VehicleClient, requests::Vector{ImageRequest}, vehicle_name::String="", external::Bool=false)
+    
     responses_raw = call(c, "simGetImages", requests, vehicle_name, external)
     return [response_raw for response_raw in responses_raw]
 end
@@ -436,8 +456,7 @@ function simGetCurrentFieldOfView(c::VehicleClient, camera_name, vehicle_name=""
 end
 #End CinemAirSim
 
-function simTestLineOfSightToPoint(c::VehicleClient, point, vehicle_name="")
-    """
+"""
     Returns whether the target point is visible from the perspective of the inputted vehicle
 
     Args:
@@ -447,11 +466,12 @@ function simTestLineOfSightToPoint(c::VehicleClient, point, vehicle_name="")
     Returns:
         [bool]: Success
     """
+function simTestLineOfSightToPoint(c::VehicleClient, point, vehicle_name="")
+    
     return call(c, "simTestLineOfSightToPoint", point, vehicle_name)
 end
 
-function simTestLineOfSightBetweenPoints(c::VehicleClient, point1, point2)
-    """
+"""
     Returns whether the target point is visible from the perspective of the source point
 
     Args:
@@ -461,22 +481,24 @@ function simTestLineOfSightBetweenPoints(c::VehicleClient, point1, point2)
     Returns:
         [bool]: Success
     """
+function simTestLineOfSightBetweenPoints(c::VehicleClient, point1, point2)
+    
     return call(c, "simTestLineOfSightBetweenPoints", point1, point2)
 end
 
-function simGetWorldExtents(c::VehicleClient)
-    """
+"""
     Returns a list of GeoPoints representing the minimum and maximum extents of the world
 
     Returns:
         list[GeoPoint]
     """
+function simGetWorldExtents(c::VehicleClient)
+    
     responses_raw = call(c, "simGetWorldExtents")
     return [GeoPoint.from_msgpack(response_raw) for response_raw in responses_raw]
 end
 
-function simRunConsoleCommand(c::VehicleClient, command)
-    """
+"""
     Allows the client to execute a command in Unreal's native console, via an API.
     Affords access to the countless built-in commands such as "stat unit", "stat fps", "open [map]", adjust any config settings, etc. etc.
     Allows the user to create bespoke APIs very easily, by adding a custom event to the level blueprint, and then calling the console command "ce MyEventName [args]". No recompilation of AirSim needed!
@@ -487,12 +509,13 @@ function simRunConsoleCommand(c::VehicleClient, command)
     Returns:
         [bool]: Success
     """
+function simRunConsoleCommand(c::VehicleClient, command)
+    
     return call(c, "simRunConsoleCommand", command)
 end
 
 #gets the static meshes in the unreal scene
-function simGetMeshPositionVertexBuffers(c::VehicleClient)
-    """
+"""
     Returns the static meshes that make up the scene
 
     See https://microsoft.github.io/AirSim/meshes/ for details and how to use this
@@ -500,23 +523,25 @@ function simGetMeshPositionVertexBuffers(c::VehicleClient)
     Returns:
         list[MeshPositionVertexBuffersResponse]:
     """
+function simGetMeshPositionVertexBuffers(c::VehicleClient)
+    
     responses_raw = call(c, "simGetMeshPositionVertexBuffers")
     return [MeshPositionVertexBuffersResponse.from_msgpack(response_raw) for response_raw in responses_raw]
 end
 
-function simGetCollisionInfo(c::VehicleClient, vehicle_name="")
-    """
+"""
     Args:
         vehicle_name (str, optional) Name of the Vehicle to get the info of
 
     Returns:
         CollisionInfo:
     """
+function simGetCollisionInfo(c::VehicleClient, vehicle_name="")
+    
     return CollisionInfo.from_msgpack(call(c, "simGetCollisionInfo", vehicle_name))
 end
 
-function simSetVehiclePose(c::VehicleClient, pose, ignore_collision, vehicle_name="")
-    """
+"""
     Set the pose of the vehicle
 
     If you don't want to change position (or orientation) then just set components of position (or orientation) to floating point nan values
@@ -526,11 +551,12 @@ function simSetVehiclePose(c::VehicleClient, pose, ignore_collision, vehicle_nam
         ignore_collision (bool) Whether to ignore any collision || not
         vehicle_name (str, optional) Name of the vehicle to move
     """
+function simSetVehiclePose(c::VehicleClient, pose, ignore_collision, vehicle_name="")
+    
     call(c, "simSetVehiclePose", pose, ignore_collision, vehicle_name)
 end
 
-function simGetVehiclePose(c::VehicleClient, vehicle_name="")
-    """
+"""
     The position inside the returned Pose is in the frame of the vehicle's starting point
 
     Args:
@@ -539,12 +565,13 @@ function simGetVehiclePose(c::VehicleClient, vehicle_name="")
     Returns:
         Pose:
     """
+function simGetVehiclePose(c::VehicleClient, vehicle_name="")
+    
     pose = call(c, "simGetVehiclePose", vehicle_name)
     return Pose.from_msgpack(pose)
 end
 
-function simSetTraceLine(c::VehicleClient, color_rgba, thickness=1.0, vehicle_name="")
-    """
+"""
     Modify the color and thickness of the line when Tracing is enabled
 
     Tracing can be enabled by pressing T in the Editor || setting `EnableTrace` to `True` in the Vehicle Settings
@@ -554,12 +581,13 @@ function simSetTraceLine(c::VehicleClient, color_rgba, thickness=1.0, vehicle_na
         thickness (float, optional) Thickness of the line
         vehicle_name (string, optional) Name of the vehicle to set Trace line values for
     """
+function simSetTraceLine(c::VehicleClient, color_rgba, thickness=1.0, vehicle_name="")
+    
     call(c, "simSetTraceLine", color_rgba, thickness, vehicle_name)
 
 end
 
-function simGetObjectPose(c::VehicleClient, object_name)
-    """
+"""
     The position inside the returned Pose is in the world frame
 
     Args:
@@ -568,13 +596,14 @@ function simGetObjectPose(c::VehicleClient, object_name)
     Returns:
         Pose:
     """
+function simGetObjectPose(c::VehicleClient, object_name)
+    
     pose = call(c, "simGetObjectPose", object_name)
     return Pose.from_msgpack(pose)
 
 end
 
-function simSetObjectPose(c::VehicleClient, object_name, pose, teleport=True)
-    """
+"""
     Set the pose of the object(actor) in the environment
 
     The specified actor must have Mobility set to movable, otherwise there will be unend
@@ -589,12 +618,13 @@ functionined behaviour.
     Returns:
         bool: If the move was successful
     """
+function simSetObjectPose(c::VehicleClient, object_name, pose, teleport=True)
+    
     return call(c, "simSetObjectPose", object_name, pose, teleport)
 
 end
 
-function simGetObjectScale(c::VehicleClient, object_name)
-    """
+"""
     Gets scale of an object in the world
 
     Args:
@@ -603,13 +633,14 @@ function simGetObjectScale(c::VehicleClient, object_name)
     Returns:
         airsim.Vector3r: Scale
     """
+function simGetObjectScale(c::VehicleClient, object_name)
+    
     scale = call(c, "simGetObjectScale", object_name)
     return Vector3r.from_msgpack(scale)
 
 end
 
-function simSetObjectScale(c::VehicleClient, object_name, scale_vector)
-    """
+"""
     Sets scale of an object in the world
 
     Args:
@@ -619,12 +650,13 @@ function simSetObjectScale(c::VehicleClient, object_name, scale_vector)
     Returns:
         bool: True if scale change was successful
     """
+function simSetObjectScale(c::VehicleClient, object_name, scale_vector)
+    
     return call(c, "simSetObjectScale", object_name, scale_vector)
 
 end
 
-function simListSceneObjects(c::VehicleClient, name_regex=".*")
-    """
+"""
     Lists the objects present in the environment
 
     end
@@ -636,12 +668,13 @@ functionault behaviour is to list all objects, regex can be used to return small
     Returns:
         list[str]: List containing all the names
     """
+function simListSceneObjects(c::VehicleClient, name_regex=".*")
+    
     return call(c, "simListSceneObjects", name_regex)
 
 end
 
-function simLoadLevel(c::VehicleClient, level_name)
-    """
+"""
     Loads a level specified by its name
 
     Args:
@@ -650,23 +683,25 @@ function simLoadLevel(c::VehicleClient, level_name)
     Returns:
         bool: True if the level was successfully loaded
     """
+function simLoadLevel(c::VehicleClient, level_name)
+    
     return call(c, "simLoadLevel", level_name)
 
 end
 
-function simListAssets(c::VehicleClient)
-    """
+"""
     Lists all the assets present in the Asset Registry
 
     Returns:
         list[str]: Names of all the assets
     """
+function simListAssets(c::VehicleClient)
+    
     return call(c, "simListAssets")
 
 end
 
-function simSpawnObject(c::VehicleClient, object_name, asset_name, pose, scale, physics_enabled=false, is_blueprint=false)
-    """Spawned selected object in the world
+"""Spawned selected object in the world
 
     Args:
         object_name (str) Desired name of new object
@@ -679,12 +714,13 @@ function simSpawnObject(c::VehicleClient, object_name, asset_name, pose, scale, 
     Returns:
         str: Name of spawned object, in case it had to be modified
     """
+function simSpawnObject(c::VehicleClient, object_name, asset_name, pose, scale, physics_enabled=false, is_blueprint=false)
+    
     return call(c, "simSpawnObject", object_name, asset_name, pose, scale, physics_enabled, is_blueprint)
 
 end
 
-function simDestroyObject(c::VehicleClient, object_name)
-    """Removes selected object from the world
+"""Removes selected object from the world
 
     Args:
         object_name (str) Name of object to be removed
@@ -692,12 +728,13 @@ function simDestroyObject(c::VehicleClient, object_name)
     Returns:
         bool: True if object is queued up for removal
     """
+function simDestroyObject(c::VehicleClient, object_name)
+    
     return call(c, "simDestroyObject", object_name)
 
 end
 
-function simSetSegmentationObjectID(c::VehicleClient, mesh_name, object_id, is_name_regex=false)
-    """
+"""
     Set segmentation ID for specific objects
 
     See https://microsoft.github.io/AirSim/image_apis/#segmentation for details
@@ -712,12 +749,13 @@ function simSetSegmentationObjectID(c::VehicleClient, mesh_name, object_id, is_n
     Returns:
         bool: If the mesh was found
     """
+function simSetSegmentationObjectID(c::VehicleClient, mesh_name, object_id, is_name_regex=false)
+    
     return call(c, "simSetSegmentationObjectID", mesh_name, object_id, is_name_regex)
 
 end
 
-function simGetSegmentationObjectID(c::VehicleClient, mesh_name)
-    """
+"""
     Returns Object ID for the given mesh name
 
     Mapping of Object IDs to RGB values can be seen at https://microsoft.github.io/AirSim/seg_rgbs.txt
@@ -725,12 +763,13 @@ function simGetSegmentationObjectID(c::VehicleClient, mesh_name)
     Args:
         mesh_name (str) Name of the mesh to get the ID of
     """
+function simGetSegmentationObjectID(c::VehicleClient, mesh_name)
+    
     return call(c, "simGetSegmentationObjectID", mesh_name)
 
 end
 
-function simAddDetectionFilterMeshName(c::VehicleClient, camera_name, image_type, mesh_name, vehicle_name="", external=false)
-    """
+"""
     Add mesh name to detect in wild card format
 
     For example: simAddDetectionFilterMeshName("Car_*") will detect all instance named "Car_*"
@@ -743,12 +782,13 @@ function simAddDetectionFilterMeshName(c::VehicleClient, camera_name, image_type
         external (bool, optional) Whether the camera is an External Camera
 
     """
+function simAddDetectionFilterMeshName(c::VehicleClient, camera_name, image_type, mesh_name, vehicle_name="", external=false)
+    
     call(c, "simAddDetectionFilterMeshName", camera_name, image_type, mesh_name, vehicle_name, external)
 
 end
 
-function simSetDetectionFilterRadius(c::VehicleClient, camera_name, image_type, radius_cm, vehicle_name="", external=false)
-    """
+"""
     Set detection radius for all cameras
 
     Args:
@@ -758,12 +798,13 @@ function simSetDetectionFilterRadius(c::VehicleClient, camera_name, image_type, 
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
+function simSetDetectionFilterRadius(c::VehicleClient, camera_name, image_type, radius_cm, vehicle_name="", external=false)
+    
     call(c, "simSetDetectionFilterRadius", camera_name, image_type, radius_cm, vehicle_name, external)
 
 end
 
-function simClearDetectionMeshNames(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
-    """
+"""
     Clear all mesh names from detection filter
 
     Args:
@@ -773,12 +814,13 @@ function simClearDetectionMeshNames(c::VehicleClient, camera_name, image_type, v
         external (bool, optional) Whether the camera is an External Camera
 
     """
+function simClearDetectionMeshNames(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
+    
     call(c, "simClearDetectionMeshNames", camera_name, image_type, vehicle_name, external)
 
 end
 
-function simGetDetections(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
-    """
+"""
     Get current detections
 
     Args:
@@ -790,13 +832,14 @@ function simGetDetections(c::VehicleClient, camera_name, image_type, vehicle_nam
     Returns:
         DetectionInfo array
     """
+function simGetDetections(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
+    
     responses_raw = call(c, "simGetDetections", camera_name, image_type, vehicle_name, external)
     return [DetectionInfo.from_msgpack(response_raw) for response_raw in responses_raw]
 
 end
 
-function simPrintLogMessage(c::VehicleClient, message, message_param="", severity=0)
-    """
+"""
     Prints the specified message in the simulator's window.
 
     If message_param is supplied, then it's printed next to the message and in that case if this API is called with same message value
@@ -810,12 +853,13 @@ function simPrintLogMessage(c::VehicleClient, message, message_param="", severit
         message_param (str, optional) Parameter to be printed next to the message
         severity (int, optional) Range 0-3, inclusive, corresponding to the severity of the message
     """
+function simPrintLogMessage(c::VehicleClient, message, message_param="", severity=0)
+    
     call(c, "simPrintLogMessage", message, message_param, severity)
 
 end
 
-function simGetCameraInfo(c::VehicleClient, camera_name, vehicle_name="", external=false)
-    """
+"""
     Get details about the camera
 
     Args:
@@ -826,13 +870,14 @@ function simGetCameraInfo(c::VehicleClient, camera_name, vehicle_name="", extern
     Returns:
         CameraInfo:
     """
+function simGetCameraInfo(c::VehicleClient, camera_name, vehicle_name="", external=false)
+    
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     return CameraInfo.from_msgpack(call(c, "simGetCameraInfo", str(camera_name), vehicle_name, external))
 
 end
 
-function simGetDistortionParams(c::VehicleClient, camera_name, vehicle_name="", external=false)
-    """
+"""
     Get camera distortion parameters
 
     Args:
@@ -843,13 +888,14 @@ function simGetDistortionParams(c::VehicleClient, camera_name, vehicle_name="", 
     Returns:
         List (float) List of distortion parameter values corresponding to K1, K2, K3, P1, P2 respectively.
     """
+function simGetDistortionParams(c::VehicleClient, camera_name, vehicle_name="", external=false)
+    
 
     return call(c, "simGetDistortionParams", str(camera_name), vehicle_name, external)
 
 end
 
-function simSetDistortionParams(c::VehicleClient, camera_name, distortion_params, vehicle_name="", external=false)
-    """
+"""
     Set camera distortion parameters
 
     Args:
@@ -859,14 +905,15 @@ function simSetDistortionParams(c::VehicleClient, camera_name, distortion_params
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
+function simSetDistortionParams(c::VehicleClient, camera_name, distortion_params, vehicle_name="", external=false)
+    
 
     for (param_name, value) in items(distortion_params)
         c::VehicleClient.simSetDistortionParam(camera_name, param_name, value, vehicle_name, external)
     end
 end
 
-function simSetDistortionParam(c::VehicleClient, camera_name, param_name, value, vehicle_name="", external=false)
-    """
+"""
     Set single camera distortion parameter
 
     Args:
@@ -876,11 +923,12 @@ function simSetDistortionParam(c::VehicleClient, camera_name, param_name, value,
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
+function simSetDistortionParam(c::VehicleClient, camera_name, param_name, value, vehicle_name="", external=false)
+    
     call(c, "simSetDistortionParam", str(camera_name), param_name, value, vehicle_name, external)
 end
 
-function simSetCameraPose(c::VehicleClient, camera_name, pose, vehicle_name="", external=false)
-    """
+"""
     - Control the pose of a selected camera
 
     Args:
@@ -889,12 +937,13 @@ function simSetCameraPose(c::VehicleClient, camera_name, pose, vehicle_name="", 
         vehicle_name (str, optional) Name of vehicle which the camera corresponds to
         external (bool, optional) Whether the camera is an External Camera
     """
+function simSetCameraPose(c::VehicleClient, camera_name, pose, vehicle_name="", external=false)
+    
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     call(c, "simSetCameraPose", str(camera_name), pose, vehicle_name, external)
 end
 
-function simSetCameraFov(c::VehicleClient, camera_name, fov_degrees, vehicle_name="", external=false)
-    """
+"""
     - Control the field of view of a selected camera
 
     Args:
@@ -903,6 +952,8 @@ function simSetCameraFov(c::VehicleClient, camera_name, fov_degrees, vehicle_nam
         vehicle_name (str, optional) Name of vehicle which the camera corresponds to
         external (bool, optional) Whether the camera is an External Camera
     """
+function simSetCameraFov(c::VehicleClient, camera_name, fov_degrees, vehicle_name="", external=false)
+    
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     call(c, "simSetCameraFov", str(camera_name), fov_degrees, vehicle_name, external)
 end
