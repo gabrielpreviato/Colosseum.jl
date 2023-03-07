@@ -1,5 +1,6 @@
 module Colosseum
 
-# Write your package code here.
+include("types.jl")
+include("client.jl")
 
 end
