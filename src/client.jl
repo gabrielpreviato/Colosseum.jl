@@ -391,6 +391,7 @@ function simGetFilmbackSettings(c::VehicleClient, camera_name, vehicle_name="", 
     result = call(c, "simGetFilmbackSettings", camera_name, vehicle_name, external)
     if (result == "" || result == "\0")
         return nothing
+    end
     return result
 end
 
