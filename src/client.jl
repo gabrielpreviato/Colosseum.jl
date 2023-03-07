@@ -35,8 +35,10 @@ end
 
 #----------------------------------- Common vehicle APIs ---------------------------------------------
 
-function reset(c::VehicleClient)
+function reset(c::VehicleClient)::Nothing
     """
+        reset(c::VehicleClient)
+    
     Reset the vehicle to its original starting state
 
     Note that you must call `enableApiControl` and `armDisarm` again after the call to reset
@@ -44,12 +46,11 @@ function reset(c::VehicleClient)
     call(c, "reset")
 end
 
-function ping(c::VehicleClient)
+function ping(::VehicleClient)::Bool
     """
-    If connection is established then this call will return true otherwise it will be blocked until timeout
+        ping(::VehicleClient)
 
-    Returns:
-        bool:
+    If connection is established then this call will return true otherwise it will be blocked until timeout
     """
     call(c, "ping")
 end

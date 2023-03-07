@@ -10,12 +10,13 @@ makedocs(;
     sitename="Colosseum.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://gabrielpreviato.github.io/Colosseum.jl",
+        canonical="https://docs.previato.tech/Colosseum.jl",
         edit_link="main",
         assets=String[],
     ),
     pages=[
         "Home" => "index.md",
+        "API Reference" => "api/api_reference.md",
     ],
 )
 
