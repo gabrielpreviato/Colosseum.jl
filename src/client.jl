@@ -86,7 +86,7 @@ function isApiControlEnabled(c::VehicleClient, vehicle_name::String="")
     """
     Returns true if API control is established.
 
-    If false (which is default) then API calls would be ignored. After a successful call to `enableApiControl`, `isApiControlEnabled` should return true.
+    If false (which is functionault) then API calls would be ignored. After a successful call to `enableApiControl`, `isApiControlEnabled` should return true.
 
     Args:
         vehicle_name (str, optional): Name of the vehicle
@@ -165,6 +165,142 @@ function getHomeGeoPoint(c::VehicleClient, vehicle_name = "")
     return MsgPack.from_msgpack(GeoPoint, msg)
 end
 
+
+function confirmConnection(c::VehicleClient)
+    """
+    Checks state of connection every 1 sec and reports it in Console so user can see the progress for connection.
+    """
+    if ping(c)
+        println("Connected!")
+    else
+        println("Ping returned false!")
+    end
+    server_ver = getServerVersion(c)
+    client_ver = getClientVersion(c)
+    server_min_ver = getMinRequiredServerVersion(c)
+    client_min_ver = getMinRequiredClientVersion(c)
+
+    ver_info = "Client Ver: $(client_ver) (Min Req: $client_min_ver), Server Ver: $server_ver (Min Req: $server_min_ver)"
+
+    if server_ver < server_min_ver
+        println(Base.stderr, ver_info)
+        println("AirSim server is of older version and not supported by this client. Please upgrade!")
+    elseif client_ver < client_min_ver
+        println(Base.stderr, ver_info)
+        println("AirSim client is of older version and not supported by this server. Please upgrade!")
+    else
+        println(ver_info)
+    end
+    println("")
+end
+
+function simSetLightIntensity(c::VehicleClient, light_name::String, intensity::Real)
+    """
+    Change intensity of named light
+
+    Args:
+        light_name (String): Name of light to change
+        intensity (Real): New intensity value
+
+    Returns:
+        bool: True if successful, otherwise False
+    """
+    return call(c, "simSetLightIntensity", light_name, intensity)
+end
+
+function simSwapTextures(c::VehicleClient, tags, tex_id = 0, component_id = 0, material_id = 0)
+    """
+    Runtime Swap Texture API
+
+    See https://microsoft.github.io/AirSim/retexturing/ for details
+
+    Args:
+        tags (str): string of "," or ", " delimited tags to identify on which actors to perform the swap
+        tex_id (int, optional): indexes the array of textures assigned to each actor undergoing a swap
+
+                                If out-of-bounds for some object's texture set, it will be taken modulo the number of textures that were available
+        component_id (int, optional):
+        material_id (int, optional):
+
+    Returns:
+        list[str]: List of objects which matched the provided tags and had the texture swap perfomed
+    """
+    return call(c, "simSwapTextures", tags, tex_id, component_id, material_id)
+end
+
+function simSetObjectMaterial(c::VehicleClient, object_name, material_name, component_id = 0)
+    """
+    Runtime Swap Texture API
+    See https://microsoft.github.io/AirSim/retexturing/ for details
+    Args:
+        object_name (str): name of object to set material for
+        material_name (str): name of material to set for object
+        component_id (int, optional) : index of material elements
+
+    Returns:
+        bool: True if material was set
+    """
+    return call(c, "simSetObjectMaterial", object_name, material_name, component_id)
+end
+
+function simSetObjectMaterialFromTexture(c::VehicleClient, object_name, texture_path, component_id = 0)
+    """
+    Runtime Swap Texture API
+    See https://microsoft.github.io/AirSim/retexturing/ for details
+    Args:
+        object_name (str): name of object to set material for
+        texture_path (str): path to texture to set for object
+        component_id (int, optional) : index of material elements
+
+    Returns:
+        bool: True if material was set
+    """
+    return call(c, "simSetObjectMaterialFromTexture", object_name, texture_path, component_id)
+end
+
+# time-of-day control
+#time - of - day control
+function simSetTimeOfDay(c::VehicleClient, is_enabled::Bool, start_datetime::String="", is_start_datetime_dst::Bool=false, celestial_clock_speed::Int=1, update_interval_secs::Int=60, move_sun::Bool=true)
+    """
+    Control the position of Sun in the environment
+
+    Sun's position is computed using the coordinates specified in `OriginGeopoint` in settings for the date-time specified in the argument,
+    else if the string is empty, current date & time is used
+
+    Args:
+        is_enabled (bool): True to enable time-of-day effect, False to reset the position to original
+        start_datetime (str, optional): Date & Time in %Y-%m-%d %H:%M:%S format, e.g. `2018-02-12 15:20:00`
+        is_start_datetime_dst (bool, optional): True to adjust for Daylight Savings Time
+        celestial_clock_speed (float, optional): Run celestial clock faster or slower than simulation clock
+                                                E.g. Value 100 means for every 1 second of simulation clock, Sun's position is advanced by 100 seconds
+                                                so Sun will move in sky much faster
+        update_interval_secs (float, optional): Interval to update the Sun's position
+        move_sun (bool, optional): Whether or not to move the Sun
+    """
+    call(c, "simSetTimeOfDay", is_enabled, start_datetime, is_start_datetime_dst, celestial_clock_speed, update_interval_secs, move_sun)
+end
+
+#weather
+function simEnableWeather(c::VehicleClient, enable::Bool)
+    """
+    Enable Weather effects. Needs to be called before using `simSetWeatherParameter` API
+
+    Args:
+        enable (bool): True to enable, False to disable
+    """
+    call(c, "simEnableWeather", enable)
+end
+
+function simSetWeatherParameter(c::VehicleClient, param, val::Real)
+    """
+    Enable various weather effects
+
+    Args:
+        param (WeatherParameter): Weather effect to be enabled
+        val (float): Intensity of the effect, Range 0-1
+    """
+    call(c, "simSetWeatherParameter", param, val)
+end
 
 #camera control
 #simGetImage returns compressed png in array of bytes
