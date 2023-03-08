@@ -957,3 +957,908 @@ function simSetCameraFov(c::VehicleClient, camera_name, fov_degrees, vehicle_nam
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     call(c, "simSetCameraFov", str(camera_name), fov_degrees, vehicle_name, external)
 end
+
+
+
+
+
+
+"""
+Get Ground truth kinematics of the vehicle
+
+The position inside the returned KinematicsState is in the frame of the vehicle's starting point
+
+Args:
+    vehicle_name (str, optional): Name of the vehicle
+
+Returns:
+    KinematicsState: Ground truth of the vehicle
+"""
+function simGetGroundTruthKinematics(c::VehicleClient, vehicle_name="")
+kinematics_state = call(c, "simGetGroundTruthKinematics", vehicle_name)
+return KinematicsState.from_msgpack(kinematics_state)
+end
+
+"""
+Set the kinematics state of the vehicle
+
+If you don't want to change position (or orientation) then just set components of position (or orientation) to floating point nan values
+
+Args:
+    state (KinematicsState): Desired Pose pf the vehicle
+    ignore_collision (bool): Whether to ignore any collision or not
+    vehicle_name (str, optional): Name of the vehicle to move
+"""
+function simSetKinematics(c::VehicleClient, state, ignore_collision, vehicle_name="")
+call(c, "simSetKinematics", state, ignore_collision, vehicle_name)
+end
+
+"""
+Get ground truth environment state
+
+The position inside the returned EnvironmentState is in the frame of the vehicle's starting point
+
+Args:
+    vehicle_name (str, optional): Name of the vehicle
+
+Returns:
+    EnvironmentState: Ground truth environment state
+"""
+function simGetGroundTruthEnvironment(c::VehicleClient, vehicle_name="")
+env_state = call(c, "simGetGroundTruthEnvironment", vehicle_name)
+return EnvironmentState.from_msgpack(env_state)
+
+
+#sensor APIsend
+
+"""
+Args:
+    imu_name (str, optional): Name of IMU to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    ImuData:
+"""
+function getImuData(c::VehicleClient, imu_name="', vehicle_name='")
+return ImuData.from_msgpack(call(c, "getImuData", imu_name, vehicle_name))
+end
+
+"""
+Args:
+    barometer_name (str, optional): Name of Barometer to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    BarometerData:
+"""
+function getBarometerData(c::VehicleClient, barometer_name="', vehicle_name='")
+return BarometerData.from_msgpack(call(c, "getBarometerData", barometer_name, vehicle_name))
+end
+
+"""
+Args:
+    magnetometer_name (str, optional): Name of Magnetometer to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    MagnetometerData:
+"""
+function getMagnetometerData(c::VehicleClient, magnetometer_name="', vehicle_name='")
+return MagnetometerData.from_msgpack(call(c, "getMagnetometerData", magnetometer_name, vehicle_name))
+end
+
+"""
+Args:
+    gps_name (str, optional): Name of GPS to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    GpsData:
+"""
+function getGpsData(c::VehicleClient, gps_name="', vehicle_name='")
+return GpsData.from_msgpack(call(c, "getGpsData", gps_name, vehicle_name))
+end
+
+"""
+Args:
+    distance_sensor_name (str, optional): Name of Distance Sensor to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    DistanceSensorData:
+"""
+function getDistanceSensorData(c::VehicleClient, distance_sensor_name="', vehicle_name='")
+return DistanceSensorData.from_msgpack(call(c, "getDistanceSensorData", distance_sensor_name, vehicle_name))
+end
+
+"""
+Args:
+    lidar_name (str, optional): Name of Lidar to get data from, specified in settings.json
+    vehicle_name (str, optional): Name of vehicle to which the sensor corresponds to
+
+Returns:
+    LidarData:
+"""
+function getLidarData(c::VehicleClient, lidar_name="', vehicle_name='")
+return LidarData.from_msgpack(call(c, "getLidarData", lidar_name, vehicle_name))
+end
+
+"""
+NOTE: Deprecated API, use `getLidarData()` API instead
+Returns Segmentation ID of each point's collided object in the last Lidar update
+
+Args:
+    lidar_name (str, optional): Name of Lidar sensor
+    vehicle_name (str, optional): Name of the vehicle wth the sensor
+
+Returns:
+    list[int]: Segmentation IDs of the objects
+"""
+function simGetLidarSegmentation(c::VehicleClient, lidar_name="', vehicle_name='")
+logging.warning("simGetLidarSegmentation API is deprecated, use getLidarData() API instead")
+return self.getLidarData(lidar_name, vehicle_name).segmentation
+
+#Plotting APIsend
+
+"""
+Clear any persistent markers - those plotted with setting `is_persistent=True` in the APIs below
+"""
+function simFlushPersistentMarkers(c::VehicleClient)
+call(c, "simFlushPersistentMarkers")
+end
+
+"""
+Plot a list of 3D points in World NED frame
+
+Args:
+    points (list[Vector3r]): List of Vector3r objects
+    color_rgba (list, optional): desired RGBA values from 0.0 to 1.0
+    size (float, optional): Size of plotted point
+    duration (float, optional): Duration (seconds) to plot for
+    is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
+"""
+function simPlotPoints(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], size=10.0, duration=-1.0, is_persistent=False)
+call(c, "simPlotPoints", points, color_rgba, size, duration, is_persistent)
+end
+
+"""
+Plots a line strip in World NED frame, defined from points[0] to points[1], points[1] to points[2], ... , points[n-2] to points[n-1]
+
+Args:
+    points (list[Vector3r]): List of 3D locations of line start and end points, specified as Vector3r objects
+    color_rgba (list, optional): desired RGBA values from 0.0 to 1.0
+    thickness (float, optional): Thickness of line
+    duration (float, optional): Duration (seconds) to plot for
+    is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
+"""
+function simPlotLineStrip(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=False)
+call(c, "simPlotLineStrip", points, color_rgba, thickness, duration, is_persistent)
+end
+
+"""
+Plots a line strip in World NED frame, defined from points[0] to points[1], points[2] to points[3], ... , points[n-2] to points[n-1]
+
+Args:
+    points (list[Vector3r]): List of 3D locations of line start and end points, specified as Vector3r objects. Must be even
+    color_rgba (list, optional): desired RGBA values from 0.0 to 1.0
+    thickness (float, optional): Thickness of line
+    duration (float, optional): Duration (seconds) to plot for
+    is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
+"""
+function simPlotLineList(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=False)
+call(c, "simPlotLineList", points, color_rgba, thickness, duration, is_persistent)
+end
+
+"""
+Plots a list of arrows in World NED frame, defined from points_start[0] to points_end[0], points_start[1] to points_end[1], ... , points_start[n-1] to points_end[n-1]
+
+Args:
+    points_start (list[Vector3r]): List of 3D start positions of arrow start positions, specified as Vector3r objects
+    points_end (list[Vector3r]): List of 3D end positions of arrow start positions, specified as Vector3r objects
+    color_rgba (list, optional): desired RGBA values from 0.0 to 1.0
+    thickness (float, optional): Thickness of line
+    arrow_size (float, optional): Size of arrow head
+    duration (float, optional): Duration (seconds) to plot for
+    is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
+"""
+function simPlotArrows(c::VehicleClient, points_start, points_end, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, arrow_size=2.0, duration=-1.0, is_persistent=False)
+call(c, "simPlotArrows", points_start, points_end, color_rgba, thickness, arrow_size, duration, is_persistent)
+
+end
+
+"""
+Plots a list of strings at desired positions in World NED frame.
+
+Args:
+    strings (list[String], optional): List of strings to plot
+    positions (list[Vector3r]): List of positions where the strings should be plotted. Should be in one-to-one correspondence with the strings' list
+    scale (float, optional): Font scale of transform name
+    color_rgba (list, optional): desired RGBA values from 0.0 to 1.0
+    duration (float, optional): Duration (seconds) to plot for
+"""
+function simPlotStrings(c::VehicleClient, strings, positions, scale=5, color_rgba=[1.0, 0.0, 0.0, 1.0], duration=-1.0)
+call(c, "simPlotStrings", strings, positions, scale, color_rgba, duration)
+end
+
+"""
+Plots a list of transforms in World NED frame.
+
+Args:
+    poses (list[Pose]): List of Pose objects representing the transforms to plot
+    scale (float, optional): Length of transforms' axes
+    thickness (float, optional): Thickness of transforms' axes
+    duration (float, optional): Duration (seconds) to plot for
+    is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
+"""
+function simPlotTransforms(c::VehicleClient, poses, scale=5.0, thickness=5.0, duration=-1.0, is_persistent=False)
+call(c, "simPlotTransforms", poses, scale, thickness, duration, is_persistent)
+end
+
+"""
+Plots a list of transforms with their names in World NED frame.
+
+Args:
+    poses (list[Pose]): List of Pose objects representing the transforms to plot
+    names (list[string]): List of strings with one-to-one correspondence to list of poses
+    tf_scale (float, optional): Length of transforms' axes
+    tf_thickness (float, optional): Thickness of transforms' axes
+    text_scale (float, optional): Font scale of transform name
+    text_color_rgba (list, optional): desired RGBA values from 0.0 to 1.0 for the transform name
+    duration (float, optional): Duration (seconds) to plot for
+"""
+function simPlotTransformsWithNames(c::VehicleClient, poses, names, tf_scale=5.0, tf_thickness=5.0, text_scale=10.0, text_color_rgba=[1.0, 0.0, 0.0, 1.0], duration=-1.0)
+call(c, "simPlotTransformsWithNames", poses, names, tf_scale, tf_thickness, text_scale, text_color_rgba, duration)
+end
+
+"""
+Cancel previous Async task
+
+Args:
+    vehicle_name (str, optional): Name of the vehicle
+"""
+function cancelLastTask(c::VehicleClient, vehicle_name="")
+call(c, "cancelLastTask", vehicle_name)
+
+#Recording APIsend
+
+"""
+Start Recording
+
+Recording will be done according to the settings
+"""
+function startRecording(c::VehicleClient)
+call(c, "startRecording")
+end
+
+"""
+Stop Recording
+"""
+function stopRecording(c::VehicleClient)
+call(c, "stopRecording")
+end
+
+"""
+Whether Recording is running or not
+
+Returns:
+    bool: True if Recording, else False
+"""
+function isRecording(c::VehicleClient)
+return call(c, "isRecording")
+end
+
+"""
+Set simulated wind, in World frame, NED direction, m/s
+
+Args:
+    wind (Vector3r): Wind, in World frame, NED direction, in m/s
+"""
+function simSetWind(c::VehicleClient, wind)
+call(c, "simSetWind", wind)
+end
+
+"""
+Construct and save a binvox-formatted voxel grid of environment
+
+Args:
+    position (Vector3r): Position around which voxel grid is centered in m
+    x, y, z (int): Size of each voxel grid dimension in m
+    res (float): Resolution of voxel grid in m
+    of (str): Name of output file to save voxel grid as
+
+Returns:
+    bool: True if output written to file successfully, else False
+"""
+function simCreateVoxelGrid(c::VehicleClient, position, x, y, z, res, of)
+return call(c, "simCreateVoxelGrid", position, x, y, z, res, of)
+
+#Add new vehicle via RPCend
+
+"""
+Create vehicle at runtime
+
+Args:
+    vehicle_name (str): Name of the vehicle being created
+    vehicle_type (str): Type of vehicle, e.g. "simpleflight"
+    pose (Pose): Initial pose of the vehicle
+    pawn_path (str, optional): Vehicle blueprint path, default empty wbich uses the default blueprint for the vehicle type
+
+Returns:
+    bool: Whether vehicle was created
+"""
+function simAddVehicle(c::VehicleClient, vehicle_name, vehicle_type, pose, pawn_path="")
+return call(c, "simAddVehicle", vehicle_name, vehicle_type, pose, pawn_path)
+end
+
+"""
+Lists the names of current vehicles
+
+Returns:
+    list[str]: List containing names of all vehicles
+"""
+function listVehicles(c::VehicleClient)
+return call(c, "listVehicles")
+end
+
+"""
+Fetch the settings text being used by AirSim
+
+Returns:
+    str: Settings text in JSON format
+"""
+function getSettingsString(c::VehicleClient)
+return call(c, "getSettingsString")
+end
+
+"""
+Set arbitrary external forces, in World frame, NED direction. Can be used
+for implementing simple payloads.
+
+Args:
+    ext_force (Vector3r): Force, in World frame, NED direction, in N
+"""
+function simSetExtForce(c::VehicleClient, ext_force)
+call(c, "simSetExtForce", ext_force)
+
+# -----------------------------------  Multirotor APIs ---------------------------------------------
+struct MultirotorClient
+end
+
+function __init__(c::VehicleClient, ip="", port=41451, timeout_value=3600)
+super(MultirotorClient, self).__init__(ip, port, timeout_value)
+end
+
+"""
+Takeoff vehicle to 3m above ground. Vehicle should not be moving when this API is used
+
+Args:
+    timeout_sec (int, optional): Timeout for the vehicle to reach desired altitude
+    vehicle_name (str, optional): Name of the vehicle to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function takeoffAsync(c::VehicleClient, timeout_sec=20, vehicle_name="")
+return call_async(c, "takeoff", timeout_sec, vehicle_name)
+end
+
+"""
+Land the vehicle
+
+Args:
+    timeout_sec (int, optional): Timeout for the vehicle to land
+    vehicle_name (str, optional): Name of the vehicle to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function landAsync(c::VehicleClient, timeout_sec=60, vehicle_name="")
+return call_async(c, "land", timeout_sec, vehicle_name)
+end
+
+"""
+Return vehicle to Home i.e. Launch location
+
+Args:
+    timeout_sec (int, optional): Timeout for the vehicle to reach desired altitude
+    vehicle_name (str, optional): Name of the vehicle to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function goHomeAsync(c::VehicleClient, timeout_sec=3e+38, vehicle_name="")
+return call_async(c, "goHome", timeout_sec, vehicle_name)
+
+#APIs for controlend
+
+"""
+Args:
+    vx (float): desired velocity in the X axis of the vehicle's local NED frame.
+    vy (float): desired velocity in the Y axis of the vehicle's local NED frame.
+    vz (float): desired velocity in the Z axis of the vehicle's local NED frame.
+    duration (float): Desired amount of time (seconds), to send this command for
+    drivetrain (DrivetrainType, optional):
+    yaw_mode (YawMode, optional):
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByVelocityBodyFrameAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+return call_async(c, "moveByVelocityBodyFrame", vx, vy, vz, duration, drivetrain, yaw_mode, vehicle_name)
+end
+
+"""
+Args:
+    vx (float): desired velocity in the X axis of the vehicle's local NED frame
+    vy (float): desired velocity in the Y axis of the vehicle's local NED frame
+    z (float): desired Z value (in local NED frame of the vehicle)
+    duration (float): Desired amount of time (seconds), to send this command for
+    drivetrain (DrivetrainType, optional):
+    yaw_mode (YawMode, optional):
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByVelocityZBodyFrameAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+
+return call_async(c, "moveByVelocityZBodyFrame", vx, vy, z, duration, drivetrain, yaw_mode, vehicle_name)
+end
+
+function moveByAngleZAsync(c::VehicleClient, pitch, roll, z, yaw, duration, vehicle_name="")
+logging.warning("moveByAngleZAsync API is deprecated, use moveByRollPitchYawZAsync() API instead")
+return call_async(c, "moveByRollPitchYawZ", roll, -pitch, -yaw, z, duration, vehicle_name)
+end
+
+function moveByAngleThrottleAsync(c::VehicleClient, pitch, roll, throttle, yaw_rate, duration, vehicle_name="")
+logging.warning("moveByAngleThrottleAsync API is deprecated, use moveByRollPitchYawrateThrottleAsync() API instead")
+return call_async(c, "moveByRollPitchYawrateThrottle", roll, -pitch, -yaw_rate, throttle, duration, vehicle_name)
+end
+
+"""
+Args:
+    vx (float): desired velocity in world (NED) X axis
+    vy (float): desired velocity in world (NED) Y axis
+    vz (float): desired velocity in world (NED) Z axis
+    duration (float): Desired amount of time (seconds), to send this command for
+    drivetrain (DrivetrainType, optional):
+    yaw_mode (YawMode, optional):
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByVelocityAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+return call_async(c, "moveByVelocity", vx, vy, vz, duration, drivetrain, yaw_mode, vehicle_name)
+end
+
+function moveByVelocityZAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+return call_async(c, "moveByVelocityZ", vx, vy, z, duration, drivetrain, yaw_mode, vehicle_name)
+end
+
+function moveOnPathAsync(c::VehicleClient, path, velocity, timeout_sec=3e+38, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(),
+    lookahead=-1, adaptive_lookahead=1, vehicle_name="")
+return call_async(c, "moveOnPath", path, velocity, timeout_sec, drivetrain, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
+end
+
+function moveToPositionAsync(c::VehicleClient, x, y, z, velocity, timeout_sec=3e+38, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(),
+    lookahead=-1, adaptive_lookahead=1, vehicle_name="")
+return call_async(c, "moveToPosition", x, y, z, velocity, timeout_sec, drivetrain, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
+end
+
+function moveToGPSAsync(c::VehicleClient, latitude, longitude, altitude, velocity, timeout_sec=3e+38, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(),
+    lookahead=-1, adaptive_lookahead=1, vehicle_name="")
+return call_async(c, "moveToGPS", latitude, longitude, altitude, velocity, timeout_sec, drivetrain, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
+end
+
+function moveToZAsync(c::VehicleClient, z, velocity, timeout_sec=3e+38, yaw_mode=YawMode(), lookahead=-1, adaptive_lookahead=1, vehicle_name="")
+return call_async(c, "moveToZ", z, velocity, timeout_sec, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
+end
+
+"""
+- Read current RC state and use it to control the vehicles.
+
+Parameters sets up the constraints on velocity and minimum altitude while flying. If RC state is detected to violate these constraints
+then that RC state would be ignored.
+
+Args:
+    vx_max (float): max velocity allowed in x direction
+    vy_max (float): max velocity allowed in y direction
+    vz_max (float): max velocity allowed in z direction
+    z_min (float): min z allowed for vehicle position
+    duration (float): after this duration vehicle would switch back to non-manual mode
+    drivetrain (DrivetrainType): when ForwardOnly, vehicle rotates itself so that its front is always facing the direction of travel. If MaxDegreeOfFreedom then it doesn't do that (crab-like movement)
+    yaw_mode (YawMode): Specifies if vehicle should face at given angle (is_rate=False) or should be rotating around its axis at given rate (is_rate=True)
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByManualAsync(c::VehicleClient, vx_max, vy_max, z_min, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+return call_async(c, "moveByManual", vx_max, vy_max, z_min, duration, drivetrain, yaw_mode, vehicle_name)
+end
+
+function rotateToYawAsync(c::VehicleClient, yaw, timeout_sec=3e+38, margin=5, vehicle_name="")
+return call_async(c, "rotateToYaw", yaw, timeout_sec, margin, vehicle_name)
+end
+
+function rotateByYawRateAsync(c::VehicleClient, yaw_rate, duration, vehicle_name="")
+return call_async(c, "rotateByYawRate", yaw_rate, duration, vehicle_name)
+end
+
+function hoverAsync(c::VehicleClient, vehicle_name="")
+return call_async(c, "hover", vehicle_name)
+end
+
+function moveByRC(c::VehicleClient, rcdata=RCData(), vehicle_name="")
+return call(c, "moveByRC", rcdata, vehicle_name)
+
+#low - level control APIend
+
+"""
+- Directly control the motors using PWM values
+
+Args:
+    front_right_pwm (float): PWM value for the front right motor (between 0.0 to 1.0)
+    rear_left_pwm (float): PWM value for the rear left motor (between 0.0 to 1.0)
+    front_left_pwm (float): PWM value for the front left motor (between 0.0 to 1.0)
+    rear_right_pwm (float): PWM value for the rear right motor (between 0.0 to 1.0)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByMotorPWMsAsync(c::VehicleClient, front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name="")
+return call_async(c, "moveByMotorPWMs", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name)
+end
+
+"""
+- z is given in local NED frame of the vehicle.
+- Roll angle, pitch angle, and yaw angle set points are given in **radians**, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll (float): Desired roll angle, in radians.
+    pitch (float): Desired pitch angle, in radians.
+    yaw (float): Desired yaw angle, in radians.
+    z (float): Desired Z value (in local NED frame of the vehicle)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByRollPitchYawZAsync(c::VehicleClient, roll, pitch, yaw, z, duration, vehicle_name="")
+return call_async(c, "moveByRollPitchYawZ", roll, -pitch, -yaw, z, duration, vehicle_name)
+end
+
+"""
+- Desired throttle is between 0.0 to 1.0
+- Roll angle, pitch angle, and yaw angle are given in **degrees** when using PX4 and in **radians** when using SimpleFlight, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll (float): Desired roll angle.
+    pitch (float): Desired pitch angle.
+    yaw (float): Desired yaw angle.
+    throttle (float): Desired throttle (between 0.0 to 1.0)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByRollPitchYawThrottleAsync(c::VehicleClient, roll, pitch, yaw, throttle, duration, vehicle_name="")
+return call_async(c, "moveByRollPitchYawThrottle", roll, -pitch, -yaw, throttle, duration, vehicle_name)
+end
+
+"""
+- Desired throttle is between 0.0 to 1.0
+- Roll angle, pitch angle, and yaw rate set points are given in **radians**, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll (float): Desired roll angle, in radians.
+    pitch (float): Desired pitch angle, in radians.
+    yaw_rate (float): Desired yaw rate, in radian per second.
+    throttle (float): Desired throttle (between 0.0 to 1.0)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByRollPitchYawrateThrottleAsync(c::VehicleClient, roll, pitch, yaw_rate, throttle, duration, vehicle_name="")
+return call_async(c, "moveByRollPitchYawrateThrottle", roll, -pitch, -yaw_rate, throttle, duration, vehicle_name)
+end
+
+"""
+- z is given in local NED frame of the vehicle.
+- Roll angle, pitch angle, and yaw rate set points are given in **radians**, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll (float): Desired roll angle, in radians.
+    pitch (float): Desired pitch angle, in radians.
+    yaw_rate (float): Desired yaw rate, in radian per second.
+    z (float): Desired Z value (in local NED frame of the vehicle)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByRollPitchYawrateZAsync(c::VehicleClient, roll, pitch, yaw_rate, z, duration, vehicle_name="")
+return call_async(c, "moveByRollPitchYawrateZ", roll, -pitch, -yaw_rate, z, duration, vehicle_name)
+end
+
+"""
+- z is given in local NED frame of the vehicle.
+- Roll rate, pitch rate, and yaw rate set points are given in **radians**, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll_rate (float): Desired roll rate, in radians / second
+    pitch_rate (float): Desired pitch rate, in radians / second
+    yaw_rate (float): Desired yaw rate, in radians / second
+    z (float): Desired Z value (in local NED frame of the vehicle)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByAngleRatesZAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, z, duration, vehicle_name="")
+return call_async(c, "moveByAngleRatesZ", roll_rate, -pitch_rate, -yaw_rate, z, duration, vehicle_name)
+end
+
+"""
+- Desired throttle is between 0.0 to 1.0
+- Roll rate, pitch rate, and yaw rate set points are given in **radians**, in the body frame.
+- The body frame follows the Front Left Up (FLU) convention, and right-handedness.
+
+- Frame Convention:
+    - X axis is along the **Front** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **roll** angle.
+    | Hence, rolling with a positive angle is equivalent to translating in the **right** direction, w.r.t. our FLU body frame.
+
+    - Y axis is along the **Left** direction of the quadrotor.
+
+    | Clockwise rotation about this axis defines a positive **pitch** angle.
+    | Hence, pitching with a positive angle is equivalent to translating in the **front** direction, w.r.t. our FLU body frame.
+
+    - Z axis is along the **Up** direction.
+
+    | Clockwise rotation about this axis defines a positive **yaw** angle.
+    | Hence, yawing with a positive angle is equivalent to rotated towards the **left** direction wrt our FLU body frame. Or in an anticlockwise fashion in the body XY / FL plane.
+
+Args:
+    roll_rate (float): Desired roll rate, in radians / second
+    pitch_rate (float): Desired pitch rate, in radians / second
+    yaw_rate (float): Desired yaw rate, in radians / second
+    throttle (float): Desired throttle (between 0.0 to 1.0)
+    duration (float): Desired amount of time (seconds), to send this command for
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+
+Returns:
+    msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
+"""
+function moveByAngleRatesThrottleAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, throttle, duration, vehicle_name="")
+return call_async(c, "moveByAngleRatesThrottle", roll_rate, -pitch_rate, -yaw_rate, throttle, duration, vehicle_name)
+end
+
+"""
+- Modifying these gains will have an affect on *ALL* move*() APIs.
+    This is because any velocity setpoint is converted to an angle level setpoint which is tracked with an angle level controllers.
+    That angle level setpoint is itself tracked with and angle rate controller.
+- This function should only be called if the default angle rate control PID gains need to be modified.
+
+Args:
+    angle_rate_gains (AngleRateControllerGains):
+        - Correspond to the roll, pitch, yaw axes, defined in the body frame.
+        - Pass AngleRateControllerGains() to reset gains to default recommended values.
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+"""
+function setAngleRateControllerGains(c::VehicleClient, angle_rate_gains=AngleRateControllerGains(), vehicle_name="")
+call(c, "setAngleRateControllerGains", *(angle_rate_gains.to_lists()+(vehicle_name,)))
+end
+
+"""
+- Sets angle level controller gains (used by any API setting angle references - for ex: moveByRollPitchYawZAsync(), moveByRollPitchYawThrottleAsync(), etc)
+- Modifying these gains will also affect the behaviour of moveByVelocityAsync() API.
+    This is because the AirSim flight controller will track velocity setpoints by converting them to angle set points.
+- This function should only be called if the default angle level control PID gains need to be modified.
+- Passing AngleLevelControllerGains() sets gains to default airsim values.
+
+Args:
+    angle_level_gains (AngleLevelControllerGains):
+        - Correspond to the roll, pitch, yaw axes, defined in the body frame.
+        - Pass AngleLevelControllerGains() to reset gains to default recommended values.
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+"""
+function setAngleLevelControllerGains(c::VehicleClient, angle_level_gains=AngleLevelControllerGains(), vehicle_name="")
+call(c, "setAngleLevelControllerGains", *(angle_level_gains.to_lists()+(vehicle_name,)))
+end
+
+"""
+- Sets velocity controller gains for moveByVelocityAsync().
+- This function should only be called if the default velocity control PID gains need to be modified.
+- Passing VelocityControllerGains() sets gains to default airsim values.
+
+Args:
+    velocity_gains (VelocityControllerGains):
+        - Correspond to the world X, Y, Z axes.
+        - Pass VelocityControllerGains() to reset gains to default recommended values.
+        - Modifying velocity controller gains will have an affect on the behaviour of moveOnSplineAsync() and moveOnSplineVelConstraintsAsync(), as they both use velocity control to track the trajectory.
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+"""
+function setVelocityControllerGains(c::VehicleClient, velocity_gains=VelocityControllerGains(), vehicle_name="")
+call(c, "setVelocityControllerGains", *(velocity_gains.to_lists()+(vehicle_name,)))
+
+end
+
+"""
+Sets position controller gains for moveByPositionAsync.
+This function should only be called if the default position control PID gains need to be modified.
+
+Args:
+    position_gains (PositionControllerGains):
+        - Correspond to the X, Y, Z axes.
+        - Pass PositionControllerGains() to reset gains to default recommended values.
+    vehicle_name (str, optional): Name of the multirotor to send this command to
+"""
+function setPositionControllerGains(c::VehicleClient, position_gains=PositionControllerGains(), vehicle_name="")
+call(c, "setPositionControllerGains", *(position_gains.to_lists()+(vehicle_name,)))
+
+#query vehicle stateend
+
+"""
+The position inside the returned MultirotorState is in the frame of the vehicle's starting point
+
+Args:
+    vehicle_name (str, optional): Vehicle to get the state of
+
+Returns:
+    MultirotorState:
+"""
+function getMultirotorState(c::VehicleClient, vehicle_name="")
+return MultirotorState.from_msgpack(call(c, "getMultirotorState", vehicle_name))
+#query rotor statesend
+
+"""
+Used to obtain the current state of all a multirotor's rotors. The state includes the speeds,
+thrusts and torques for all rotors.
+
+Args:
+    vehicle_name (str, optional): Vehicle to get the rotor state of
+
+Returns:
+    RotorStates: Containing a timestamp and the speed, thrust and torque of all rotors.
+"""
+function getRotorStates(c::VehicleClient, vehicle_name="")
+return RotorStates.from_msgpack(call(c, "getRotorStates", vehicle_name))
+
+#----------------------------------- Car APIs ---------------------------------------------
+struct CarClient
+end
+
+function __init__(c::VehicleClient, ip="", port=41451, timeout_value=3600)
+super(CarClient, self).__init__(ip, port, timeout_value)
+end
+
+"""
+Control the car using throttle, steering, brake, etc.
+
+Args:
+    controls (CarControls): Struct containing control values
+    vehicle_name (str, optional): Name of vehicle to be controlled
+"""
+function setCarControls(c::VehicleClient, controls, vehicle_name="")
+call(c, "setCarControls", controls, vehicle_name)
+end
+
+"""
+The position inside the returned CarState is in the frame of the vehicle's starting point
+
+Args:
+    vehicle_name (str, optional): Name of vehicle
+
+Returns:
+    CarState:
+"""
+function getCarState(c::VehicleClient, vehicle_name="")
+state_raw = call(c, "getCarState", vehicle_name)
+return CarState.from_msgpack(state_raw)
+end
+
+"""
+Args:
+    vehicle_name (str, optional): Name of vehicle
+
+Returns:
+    CarControls:
+"""
+function getCarControls(c::VehicleClient, vehicle_name="")
+controls_raw = call(c, "getCarControls", vehicle_name)
+return CarControls.from_msgpack(controls_raw)
