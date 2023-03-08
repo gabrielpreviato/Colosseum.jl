@@ -4,6 +4,10 @@ using LinearAlgebra
 
 @enum ImageType Scene=0 DepthPlanar=1 DepthPerspective=2 DepthVis=3 DisparityNormalized=4 Segmentation=5 SurfaceNormals=6 Infrared=7 OpticalFlow=8 OpticalFlowVis=9
 
+MsgPack.msgpack_type(::Type{ImageType}) = MsgPack.IntegerType()
+
+Base.isless(a::Colosseum.ImageType, b::Int) = Base.isless(Int(a), b)
+
 @enum DrivetrainType MaxDegreeOfFreedom=0 ForwardOnly=1
 
 @enum LandedState Landed=0 Flying=1
@@ -209,7 +213,343 @@ struct GeoPoint
     altitude::Real
 end
 
-GeoPoint(msg::Dict{Any, Any}) = GeoPoint(msg["latitude"], msg["longitude"], msg["altitude"])
+GeoPoint() = GeoPoint(0.0, 0.0, 0.0)
+# GeoPoint(msg::Dict{Any, Any}) = GeoPoint(msg["latitude"], msg["longitude"], msg["altitude"])
 
 MsgPack.msgpack_type(::Type{GeoPoint}) = MsgPack.StructType()
-MsgPack.from_msgpack(T::Type{GeoPoint}, x::Dict{Any, Any}) = GeoPoint(x)
+# MsgPack.from_msgpack(::Type{GeoPoint}, x::Dict{Any, Any}) = GeoPoint(x)
+
+struct YawMode
+    is_rate::Bool
+    yaw_or_rate::Real
+end
+
+MsgPack.msgpack_type(::Type{YawMode}) = MsgPack.StructType()
+
+YawMode() = YawMode(true, 0.0)
+
+struct RCData
+    timestamp::Int
+    pitch::Real
+    roll::Real
+    throttle::Real
+    yaw::Real
+    switch1::Int
+    switch2::Int
+    switch3::Int
+    switch4::Int
+    switch5::Int
+    switch6::Int
+    switch7::Int
+    switch8::Int
+    is_initialized::Bool
+    is_valid::Bool
+end
+
+MsgPack.msgpack_type(::Type{RCData}) = MsgPack.StructType()
+
+RCData() = RCData(0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0, false, false)
+
+struct ImageResponse
+    image_data_uint8::Vector{UInt8}
+    image_data_float::Vector{Float32}
+    camera_position::Vector3r
+    camera_orientation::Quaternionr
+    time_stamp::Int
+    message::String
+    pixels_as_float::Bool
+    compress::Bool
+    width::Int
+    height::Int
+    image_type::ImageType
+end
+
+MsgPack.msgpack_type(::Type{ImageResponse}) = MsgPack.StructType()
+# MsgPack.from_msgpack(::Type{ImageResponse}, x::Dict{Any, Any}) = ImageResponse(x)
+
+ImageResponse() = ImageResponse(Vector{UInt8}(undef, 0x00), Vector{Float32}(undef, 0.0f0), Vector3r(), Quaternionr(), 0, "", false, true, 0, 0, Scene)
+
+# struct CarControls
+#         throttle = 0.0
+#         steering = 0.0
+#         brake = 0.0
+#         handbrake = False
+#         is_manual_gear = False
+#         manual_gear = 0
+#         gear_immediate = True
+    
+    
+#         function set_throttle(self, throttle_val, forward)
+#             if (forward)
+#                 self.is_manual_gear = False
+#                 self.manual_gear = 0
+#                 self.throttle = abs(throttle_val)
+#             else
+#                 self.is_manual_gear = False
+#                 self.manual_gear = -1
+#                 self.throttle = - abs(throttle_val)
+#             end
+#         end
+    
+#     end
+
+# struct KinematicsState
+#         position = Vector3r()
+#         orientation = Quaternionr()
+#         linear_velocity = Vector3r()
+#         angular_velocity = Vector3r()
+#         linear_acceleration = Vector3r()
+#         angular_acceleration = Vector3r()
+    
+#     end
+
+# struct EnvironmentState
+#         position = Vector3r()
+#         geo_point = GeoPoint()
+#         gravity = Vector3r()
+#         air_pressure = 0.0
+#         temperature = 0.0
+#         air_density = 0.0
+    
+#     end
+
+# struct CarState
+#         speed = 0.0
+#         gear = 0
+#         rpm = 0.0
+#         maxrpm = 0.0
+#         handbrake = False
+#         collision = CollisionInfo()
+#         kinematics_estimated = KinematicsState()
+#         timestamp = np.uint64(0)
+    
+#     end
+
+# struct MultirotorState
+#         collision = CollisionInfo()
+#         kinematics_estimated = KinematicsState()
+#         gps_location = GeoPoint()
+#         timestamp = np.uint64(0)
+#         landed_state = LandedState.Landed
+#         rc_data = RCData()
+#         ready = False
+#         ready_message = ""
+#         can_arm = False
+    
+#     end
+
+# struct RotorStates
+#         timestamp = np.uint64(0)
+#         rotors = []
+    
+#     end
+
+# struct ProjectionMatrix
+#         matrix = []
+    
+#     end
+
+# struct CameraInfo
+#         pose = Pose()
+#         fov = -1
+#         proj_mat = ProjectionMatrix()
+    
+#     end
+
+# struct LidarData
+#         point_cloud = 0.0
+#         time_stamp = np.uint64(0)
+#         pose = Pose()
+#         segmentation = 0
+    
+#     end
+
+# struct ImuData
+#         time_stamp = np.uint64(0)
+#         orientation = Quaternionr()
+#         angular_velocity = Vector3r()
+#         linear_acceleration = Vector3r()
+    
+#     end
+
+# struct BarometerData
+#         time_stamp = np.uint64(0)
+#         altitude = Quaternionr()
+#         pressure = Vector3r()
+#         qnh = Vector3r()
+    
+#     end
+
+# struct MagnetometerData
+#         time_stamp = np.uint64(0)
+#         magnetic_field_body = Vector3r()
+#         magnetic_field_covariance = 0.0
+    
+#     end
+
+# struct GnssFixType
+#         GNSS_FIX_NO_FIX = 0
+#         GNSS_FIX_TIME_ONLY = 1
+#         GNSS_FIX_2D_FIX = 2
+#         GNSS_FIX_3D_FIX = 3
+    
+#     end
+
+# struct GnssReport
+#         geo_point = GeoPoint()
+#         eph = 0.0
+#         epv = 0.0
+#         velocity = Vector3r()
+#         fix_type = GnssFixType()
+#         time_utc = np.uint64(0)
+    
+#     end
+
+# struct GpsData
+#         time_stamp = np.uint64(0)
+#         gnss = GnssReport()
+#         is_valid = False
+    
+#     end
+
+# struct DistanceSensorData
+#         time_stamp = np.uint64(0)
+#         distance = 0.0
+#         min_distance = 0.0
+#         max_distance = 0.0
+#         relative_pose = Pose()
+    
+#     end
+
+# struct Box2D
+#         min = Vector2r()
+#         max = Vector2r()
+    
+#     end
+
+# struct Box3D
+#         min = Vector3r()
+#         max = Vector3r()
+    
+#     end
+
+# struct DetectionInfo
+#         name = ''
+#         geo_point = GeoPoint()
+#         box2D = Box2D()
+#         box3D = Box3D()
+#         relative_pose = Pose()
+        
+#     end
+
+# struct PIDGains
+#         """
+#         Struct to store values of PID gains. Used to transmit controller gain values while instantiating
+#         AngleLevel/AngleRate/Velocity/PositionControllerGains objects.
+    
+#         Attributes:
+#             kP (float): Proportional gain
+#             kI (float): Integrator gain
+#             kD (float): Derivative gain
+#         """
+#         def __init__(self, kp, ki, kd):
+#             self.kp = kp
+#             self.ki = ki
+#             self.kd = kd
+    
+#         def to_list(self):
+#             return [self.kp, self.ki, self.kd]
+    
+#     end
+
+# struct AngleRateControllerGains
+#         """
+#         Struct to contain controller gains used by angle level PID controller
+    
+#         Attributes:
+#             roll_gains (PIDGains): kP, kI, kD for roll axis
+#             pitch_gains (PIDGains): kP, kI, kD for pitch axis
+#             yaw_gains (PIDGains): kP, kI, kD for yaw axis
+#         """
+#         def __init__(self, roll_gains = PIDGains(0.25, 0, 0),
+#                            pitch_gains = PIDGains(0.25, 0, 0),
+#                            yaw_gains = PIDGains(0.25, 0, 0)):
+#             self.roll_gains = roll_gains
+#             self.pitch_gains = pitch_gains
+#             self.yaw_gains = yaw_gains
+    
+#         def to_lists(self):
+#             return [self.roll_gains.kp, self.pitch_gains.kp, self.yaw_gains.kp], [self.roll_gains.ki, self.pitch_gains.ki, self.yaw_gains.ki], [self.roll_gains.kd, self.pitch_gains.kd, self.yaw_gains.kd]
+    
+#     end
+
+# struct AngleLevelControllerGains
+#         """
+#         Struct to contain controller gains used by angle rate PID controller
+    
+#         Attributes:
+#             roll_gains (PIDGains): kP, kI, kD for roll axis
+#             pitch_gains (PIDGains): kP, kI, kD for pitch axis
+#             yaw_gains (PIDGains): kP, kI, kD for yaw axis
+#         """
+#         def __init__(self, roll_gains = PIDGains(2.5, 0, 0),
+#                            pitch_gains = PIDGains(2.5, 0, 0),
+#                            yaw_gains = PIDGains(2.5, 0, 0)):
+#             self.roll_gains = roll_gains
+#             self.pitch_gains = pitch_gains
+#             self.yaw_gains = yaw_gains
+    
+#         def to_lists(self):
+#             return [self.roll_gains.kp, self.pitch_gains.kp, self.yaw_gains.kp], [self.roll_gains.ki, self.pitch_gains.ki, self.yaw_gains.ki], [self.roll_gains.kd, self.pitch_gains.kd, self.yaw_gains.kd]
+    
+#     end
+
+# struct VelocityControllerGains
+#         """
+#         Struct to contain controller gains used by velocity PID controller
+    
+#         Attributes:
+#             x_gains (PIDGains): kP, kI, kD for X axis
+#             y_gains (PIDGains): kP, kI, kD for Y axis
+#             z_gains (PIDGains): kP, kI, kD for Z axis
+#         """
+#         def __init__(self, x_gains = PIDGains(0.2, 0, 0),
+#                            y_gains = PIDGains(0.2, 0, 0),
+#                            z_gains = PIDGains(2.0, 2.0, 0)):
+#             self.x_gains = x_gains
+#             self.y_gains = y_gains
+#             self.z_gains = z_gains
+    
+#         def to_lists(self):
+#             return [self.x_gains.kp, self.y_gains.kp, self.z_gains.kp], [self.x_gains.ki, self.y_gains.ki, self.z_gains.ki], [self.x_gains.kd, self.y_gains.kd, self.z_gains.kd]
+    
+#     end
+
+# struct PositionControllerGains
+#         """
+#         Struct to contain controller gains used by position PID controller
+    
+#         Attributes:
+#             x_gains (PIDGains): kP, kI, kD for X axis
+#             y_gains (PIDGains): kP, kI, kD for Y axis
+#             z_gains (PIDGains): kP, kI, kD for Z axis
+#         """
+#         def __init__(self, x_gains = PIDGains(0.25, 0, 0),
+#                            y_gains = PIDGains(0.25, 0, 0),
+#                            z_gains = PIDGains(0.25, 0, 0)):
+#             self.x_gains = x_gains
+#             self.y_gains = y_gains
+#             self.z_gains = z_gains
+    
+#         def to_lists(self):
+#             return [self.x_gains.kp, self.y_gains.kp, self.z_gains.kp], [self.x_gains.ki, self.y_gains.ki, self.z_gains.ki], [self.x_gains.kd, self.y_gains.kd, self.z_gains.kd]
+    
+#     end
+
+# struct MeshPositionVertexBuffersResponse
+#         position = Vector3r()
+#         orientation = Quaternionr()
+#         vertices = 0.0
+#         indices = 0.0
+#         name = ''
+# end

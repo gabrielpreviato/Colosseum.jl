@@ -18,9 +18,9 @@ function VehicleClient(ip::String="127.0.0.1", port::Int=41451)
     VehicleClient(client)
 end
 
-function call(c::AbstractVehicleClient, method::String, args...; idx::UInt8=0x00)
+function call(c::AbstractVehicleClient, method::String, args...; idx::UInt8=0x00, T::Type=Any)
     bytes = pack(c.client, [0x00, idx, method, [args...]])
-    msg = unpack(c.client)
+    msg = unpack(c.client, T)
 
     if msg[1] != RESPONSE
         throw("call to method $method didn't return a RESPONSE")
@@ -366,7 +366,7 @@ end
         list[ImageResponse]:
     """
 function simGetImages(c::AbstractVehicleClient, requests::Vector{ImageRequest}, vehicle_name::String="", external::Bool=false)
-    responses_raw = call(c, "simGetImages", requests, vehicle_name, external)
+    responses_raw = call(c, "simGetImages", requests, vehicle_name, external; T=ImageResponse)
     return [response_raw for response_raw in responses_raw]
 end
 
