@@ -170,7 +170,7 @@ end
     Returns:
         GeoPoint: Home location of the vehicle
     """
-function getHomeGeoPoint(c::VehicleClient, vehicle_name="")
+function getHomeGeoPoint(c::VehicleClient, vehicle_name::String="")
     
     msg = call(c, "getHomeGeoPoint", vehicle_name)
     return MsgPack.from_msgpack(GeoPoint, msg)
@@ -338,10 +338,8 @@ end
         Binary string literal of compressed png image
     """
 function simGetImage(c::VehicleClient, camera_name::Union{String,Int}, image_type::ImageType, vehicle_name::String="", external::Bool=false)
-    
-
     #because this method returns std::vector < uint8>, msgpack decides to encode it as a string unfortunately.
-    result = call(c, "simGetImage", camera_name, image_type.property, vehicle_name, external)
+    result = call(c, "simGetImage", camera_name, image_type, vehicle_name, external)
     if result == "" || result == "\0"
         return nothing
     end
@@ -366,14 +364,13 @@ end
         list[ImageResponse]:
     """
 function simGetImages(c::VehicleClient, requests::Vector{ImageRequest}, vehicle_name::String="", external::Bool=false)
-    
     responses_raw = call(c, "simGetImages", requests, vehicle_name, external)
     return [response_raw for response_raw in responses_raw]
 end
 
 
 #CinemAirSim
-function simGetPresetLensSettings(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetPresetLensSettings(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     result = call(c, "simGetPresetLensSettings", camera_name, vehicle_name, external)
     if (result == "" || result == "\0")
         return nothing
@@ -382,7 +379,7 @@ function simGetPresetLensSettings(c::VehicleClient, camera_name, vehicle_name=""
 
 end
 
-function simGetLensSettings(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetLensSettings(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     result = call(c, "simGetLensSettings", camera_name, vehicle_name, external)
     if (result == "" || result == "\0")
         return nothing
@@ -390,11 +387,11 @@ function simGetLensSettings(c::VehicleClient, camera_name, vehicle_name="", exte
 return result
 end
 
-function simSetPresetLensSettings(c::VehicleClient, preset_lens_settings, camera_name, vehicle_name="", external=false)  
+function simSetPresetLensSettings(c::VehicleClient, preset_lens_settings, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simSetPresetLensSettings", preset_lens_settings, camera_name, vehicle_name, external)
 end
 
-function simGetPresetFilmbackSettings(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetPresetFilmbackSettings(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     result = call(c, "simGetPresetFilmbackSettings", camera_name, vehicle_name, external)
     if (result == "" || result == "\0")
         return nothing
@@ -403,11 +400,11 @@ function simGetPresetFilmbackSettings(c::VehicleClient, camera_name, vehicle_nam
 
 end
 
-function simSetPresetFilmbackSettings(c::VehicleClient, preset_filmback_settings, camera_name, vehicle_name="", external=false)  
+function simSetPresetFilmbackSettings(c::VehicleClient, preset_filmback_settings, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simSetPresetFilmbackSettings", preset_filmback_settings, camera_name, vehicle_name, external)
 end
 
-function simGetFilmbackSettings(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetFilmbackSettings(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     result = call(c, "simGetFilmbackSettings", camera_name, vehicle_name, external)
     if (result == "" || result == "\0")
         return nothing
@@ -415,43 +412,43 @@ function simGetFilmbackSettings(c::VehicleClient, camera_name, vehicle_name="", 
     return result
 end
 
-function simSetFilmbackSettings(c::VehicleClient, sensor_width, sensor_height, camera_name, vehicle_name="", external=false)  
+function simSetFilmbackSettings(c::VehicleClient, sensor_width, sensor_height, camera_name::String, vehicle_name::String="", external::Bool=false)  
     return call(c, "simSetFilmbackSettings", sensor_width, sensor_height, camera_name, vehicle_name, external)
 end
 
-function simGetFocalLength(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetFocalLength(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     return call(c, "simGetFocalLength", camera_name, vehicle_name, external)
 end
 
-function simSetFocalLength(c::VehicleClient, focal_length, camera_name, vehicle_name="", external=false)  
+function simSetFocalLength(c::VehicleClient, focal_length, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simSetFocalLength", focal_length, camera_name, vehicle_name, external)
 end
 
-function simEnableManualFocus(c::VehicleClient, enable, camera_name, vehicle_name="", external=false)  
+function simEnableManualFocus(c::VehicleClient, enable, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simEnableManualFocus", enable, camera_name, vehicle_name, external)
 end
 
-function simGetFocusDistance(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetFocusDistance(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     return call(c, "simGetFocusDistance", camera_name, vehicle_name, external)
 end
 
-function simSetFocusDistance(c::VehicleClient, focus_distance, camera_name, vehicle_name="", external=false)  
+function simSetFocusDistance(c::VehicleClient, focus_distance, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simSetFocusDistance", focus_distance, camera_name, vehicle_name, external)
 end
 
-function simGetFocusAperture(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetFocusAperture(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     return call(c, "simGetFocusAperture", camera_name, vehicle_name, external)
 end
 
-function simSetFocusAperture(c::VehicleClient, focus_aperture, camera_name, vehicle_name="", external=false)  
+function simSetFocusAperture(c::VehicleClient, focus_aperture, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simSetFocusAperture", focus_aperture, camera_name, vehicle_name, external)
 end
 
-function simEnableFocusPlane(c::VehicleClient, enable, camera_name, vehicle_name="", external=false)  
+function simEnableFocusPlane(c::VehicleClient, enable, camera_name::String, vehicle_name::String="", external::Bool=false)  
     call(c, "simEnableFocusPlane", enable, camera_name, vehicle_name, external)
 end
 
-function simGetCurrentFieldOfView(c::VehicleClient, camera_name, vehicle_name="", external=false)  
+function simGetCurrentFieldOfView(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)  
     return call(c, "simGetCurrentFieldOfView", camera_name, vehicle_name, external) 
 end
 #End CinemAirSim
@@ -466,7 +463,7 @@ end
     Returns:
         [bool]: Success
     """
-function simTestLineOfSightToPoint(c::VehicleClient, point, vehicle_name="")
+function simTestLineOfSightToPoint(c::VehicleClient, point, vehicle_name::String="")
     
     return call(c, "simTestLineOfSightToPoint", point, vehicle_name)
 end
@@ -536,7 +533,7 @@ end
     Returns:
         CollisionInfo:
     """
-function simGetCollisionInfo(c::VehicleClient, vehicle_name="")
+function simGetCollisionInfo(c::VehicleClient, vehicle_name::String="")
     
     return CollisionInfo.from_msgpack(call(c, "simGetCollisionInfo", vehicle_name))
 end
@@ -551,7 +548,7 @@ end
         ignore_collision (bool) Whether to ignore any collision || not
         vehicle_name (str, optional) Name of the vehicle to move
     """
-function simSetVehiclePose(c::VehicleClient, pose, ignore_collision, vehicle_name="")
+function simSetVehiclePose(c::VehicleClient, pose, ignore_collision, vehicle_name::String="")
     
     call(c, "simSetVehiclePose", pose, ignore_collision, vehicle_name)
 end
@@ -565,7 +562,7 @@ end
     Returns:
         Pose:
     """
-function simGetVehiclePose(c::VehicleClient, vehicle_name="")
+function simGetVehiclePose(c::VehicleClient, vehicle_name::String="")
     
     pose = call(c, "simGetVehiclePose", vehicle_name)
     return Pose.from_msgpack(pose)
@@ -581,7 +578,7 @@ end
         thickness (float, optional) Thickness of the line
         vehicle_name (string, optional) Name of the vehicle to set Trace line values for
     """
-function simSetTraceLine(c::VehicleClient, color_rgba, thickness=1.0, vehicle_name="")
+function simSetTraceLine(c::VehicleClient, color_rgba, thickness=1.0, vehicle_name::String="")
     
     call(c, "simSetTraceLine", color_rgba, thickness, vehicle_name)
 
@@ -782,7 +779,7 @@ end
         external (bool, optional) Whether the camera is an External Camera
 
     """
-function simAddDetectionFilterMeshName(c::VehicleClient, camera_name, image_type, mesh_name, vehicle_name="", external=false)
+function simAddDetectionFilterMeshName(c::VehicleClient, camera_name::String, image_type::ImageType, mesh_name, vehicle_name::String="", external::Bool=false)
     
     call(c, "simAddDetectionFilterMeshName", camera_name, image_type, mesh_name, vehicle_name, external)
 
@@ -798,7 +795,7 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDetectionFilterRadius(c::VehicleClient, camera_name, image_type, radius_cm, vehicle_name="", external=false)
+function simSetDetectionFilterRadius(c::VehicleClient, camera_name::String, image_type::ImageType, radius_cm, vehicle_name::String="", external::Bool=false)
     
     call(c, "simSetDetectionFilterRadius", camera_name, image_type, radius_cm, vehicle_name, external)
 
@@ -814,7 +811,7 @@ end
         external (bool, optional) Whether the camera is an External Camera
 
     """
-function simClearDetectionMeshNames(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
+function simClearDetectionMeshNames(c::VehicleClient, camera_name::String, image_type::ImageType, vehicle_name::String="", external::Bool=false)
     
     call(c, "simClearDetectionMeshNames", camera_name, image_type, vehicle_name, external)
 
@@ -832,7 +829,7 @@ end
     Returns:
         DetectionInfo array
     """
-function simGetDetections(c::VehicleClient, camera_name, image_type, vehicle_name="", external=false)
+function simGetDetections(c::VehicleClient, camera_name::String, image_type::ImageType, vehicle_name::String="", external::Bool=false)
     
     responses_raw = call(c, "simGetDetections", camera_name, image_type, vehicle_name, external)
     return [DetectionInfo.from_msgpack(response_raw) for response_raw in responses_raw]
@@ -870,7 +867,7 @@ end
     Returns:
         CameraInfo:
     """
-function simGetCameraInfo(c::VehicleClient, camera_name, vehicle_name="", external=false)
+function simGetCameraInfo(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)
     
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     return CameraInfo.from_msgpack(call(c, "simGetCameraInfo", str(camera_name), vehicle_name, external))
@@ -888,7 +885,7 @@ end
     Returns:
         List (float) List of distortion parameter values corresponding to K1, K2, K3, P1, P2 respectively.
     """
-function simGetDistortionParams(c::VehicleClient, camera_name, vehicle_name="", external=false)
+function simGetDistortionParams(c::VehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)
     
 
     return call(c, "simGetDistortionParams", str(camera_name), vehicle_name, external)
@@ -905,7 +902,7 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDistortionParams(c::VehicleClient, camera_name, distortion_params, vehicle_name="", external=false)
+function simSetDistortionParams(c::VehicleClient, camera_name::String, distortion_params, vehicle_name::String="", external::Bool=false)
     
 
     for (param_name, value) in items(distortion_params)
@@ -923,7 +920,7 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDistortionParam(c::VehicleClient, camera_name, param_name, value, vehicle_name="", external=false)
+function simSetDistortionParam(c::VehicleClient, camera_name::String, param_name, value, vehicle_name::String="", external::Bool=false)
     
     call(c, "simSetDistortionParam", str(camera_name), param_name, value, vehicle_name, external)
 end
@@ -937,7 +934,7 @@ end
         vehicle_name (str, optional) Name of vehicle which the camera corresponds to
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetCameraPose(c::VehicleClient, camera_name, pose, vehicle_name="", external=false)
+function simSetCameraPose(c::VehicleClient, camera_name::String, pose, vehicle_name::String="", external::Bool=false)
     
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     call(c, "simSetCameraPose", str(camera_name), pose, vehicle_name, external)
@@ -952,7 +949,7 @@ end
         vehicle_name (str, optional) Name of vehicle which the camera corresponds to
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetCameraFov(c::VehicleClient, camera_name, fov_degrees, vehicle_name="", external=false)
+function simSetCameraFov(c::VehicleClient, camera_name::String, fov_degrees, vehicle_name::String="", external::Bool=false)
     
 #TODO : below str() conversion is only needed for legacy reason and should be removed in future
     call(c, "simSetCameraFov", str(camera_name), fov_degrees, vehicle_name, external)
@@ -964,7 +961,7 @@ end
 
 
 """
-Get Ground truth kinematics of the vehicle
+Get Ground truth kinematics of the vehiclevehicle_name=""
 
 The position inside the returned KinematicsState is in the frame of the vehicle's starting point
 
@@ -974,9 +971,9 @@ Args:
 Returns:
     KinematicsState: Ground truth of the vehicle
 """
-function simGetGroundTruthKinematics(c::VehicleClient, vehicle_name="")
-kinematics_state = call(c, "simGetGroundTruthKinematics", vehicle_name)
-return KinematicsState.from_msgpack(kinematics_state)
+function simGetGroundTruthKinematics(c::VehicleClient, vehicle_name::String="")
+    kinematics_state = call(c, "simGetGroundTruthKinematics", vehicle_name)
+    return KinematicsState.from_msgpack(kinematics_state)
 end
 
 """
@@ -989,8 +986,8 @@ Args:
     ignore_collision (bool): Whether to ignore any collision or not
     vehicle_name (str, optional): Name of the vehicle to move
 """
-function simSetKinematics(c::VehicleClient, state, ignore_collision, vehicle_name="")
-call(c, "simSetKinematics", state, ignore_collision, vehicle_name)
+function simSetKinematics(c::VehicleClient, state, ignore_collision, vehicle_name::String="")
+    call(c, "simSetKinematics", state, ignore_collision, vehicle_name)
 end
 
 """
@@ -1004,9 +1001,10 @@ Args:
 Returns:
     EnvironmentState: Ground truth environment state
 """
-function simGetGroundTruthEnvironment(c::VehicleClient, vehicle_name="")
-env_state = call(c, "simGetGroundTruthEnvironment", vehicle_name)
-return EnvironmentState.from_msgpack(env_state)
+function simGetGroundTruthEnvironment(c::VehicleClient, vehicle_name::String="")
+    env_state = call(c, "simGetGroundTruthEnvironment", vehicle_name)
+    return EnvironmentState.from_msgpack(env_state)
+end
 
 
 #sensor APIsend
@@ -1097,6 +1095,7 @@ Returns:
 function simGetLidarSegmentation(c::VehicleClient, lidar_name="', vehicle_name='")
 logging.warning("simGetLidarSegmentation API is deprecated, use getLidarData() API instead")
 return self.getLidarData(lidar_name, vehicle_name).segmentation
+end
 
 #Plotting APIsend
 
@@ -1117,7 +1116,7 @@ Args:
     duration (float, optional): Duration (seconds) to plot for
     is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
 """
-function simPlotPoints(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], size=10.0, duration=-1.0, is_persistent=False)
+function simPlotPoints(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], size=10.0, duration=-1.0, is_persistent=false)
 call(c, "simPlotPoints", points, color_rgba, size, duration, is_persistent)
 end
 
@@ -1131,7 +1130,7 @@ Args:
     duration (float, optional): Duration (seconds) to plot for
     is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
 """
-function simPlotLineStrip(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=False)
+function simPlotLineStrip(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=false)
 call(c, "simPlotLineStrip", points, color_rgba, thickness, duration, is_persistent)
 end
 
@@ -1145,7 +1144,7 @@ Args:
     duration (float, optional): Duration (seconds) to plot for
     is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
 """
-function simPlotLineList(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=False)
+function simPlotLineList(c::VehicleClient, points, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, duration=-1.0, is_persistent=false)
 call(c, "simPlotLineList", points, color_rgba, thickness, duration, is_persistent)
 end
 
@@ -1161,7 +1160,7 @@ Args:
     duration (float, optional): Duration (seconds) to plot for
     is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
 """
-function simPlotArrows(c::VehicleClient, points_start, points_end, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, arrow_size=2.0, duration=-1.0, is_persistent=False)
+function simPlotArrows(c::VehicleClient, points_start, points_end, color_rgba=[1.0, 0.0, 0.0, 1.0], thickness=5.0, arrow_size=2.0, duration=-1.0, is_persistent=false)
 call(c, "simPlotArrows", points_start, points_end, color_rgba, thickness, arrow_size, duration, is_persistent)
 
 end
@@ -1190,7 +1189,7 @@ Args:
     duration (float, optional): Duration (seconds) to plot for
     is_persistent (bool, optional): If set to True, the desired object will be plotted for infinite time.
 """
-function simPlotTransforms(c::VehicleClient, poses, scale=5.0, thickness=5.0, duration=-1.0, is_persistent=False)
+function simPlotTransforms(c::VehicleClient, poses, scale=5.0, thickness=5.0, duration=-1.0, is_persistent=false)
 call(c, "simPlotTransforms", poses, scale, thickness, duration, is_persistent)
 end
 
@@ -1216,8 +1215,9 @@ Cancel previous Async task
 Args:
     vehicle_name (str, optional): Name of the vehicle
 """
-function cancelLastTask(c::VehicleClient, vehicle_name="")
+function cancelLastTask(c::VehicleClient, vehicle_name::String="")
 call(c, "cancelLastTask", vehicle_name)
+end
 
 #Recording APIsend
 
@@ -1241,7 +1241,7 @@ end
 Whether Recording is running or not
 
 Returns:
-    bool: True if Recording, else False
+    bool: True if Recording, else false
 """
 function isRecording(c::VehicleClient)
 return call(c, "isRecording")
@@ -1267,10 +1267,11 @@ Args:
     of (str): Name of output file to save voxel grid as
 
 Returns:
-    bool: True if output written to file successfully, else False
+    bool: True if output written to file successfully, else false
 """
 function simCreateVoxelGrid(c::VehicleClient, position, x, y, z, res, of)
 return call(c, "simCreateVoxelGrid", position, x, y, z, res, of)
+end
 
 #Add new vehicle via RPCend
 
@@ -1319,6 +1320,7 @@ Args:
 """
 function simSetExtForce(c::VehicleClient, ext_force)
 call(c, "simSetExtForce", ext_force)
+end
 
 # -----------------------------------  Multirotor APIs ---------------------------------------------
 struct MultirotorClient
@@ -1338,7 +1340,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function takeoffAsync(c::VehicleClient, timeout_sec=20, vehicle_name="")
+function takeoffAsync(c::VehicleClient, timeout_sec=20, vehicle_name::String="")
 return call_async(c, "takeoff", timeout_sec, vehicle_name)
 end
 
@@ -1352,7 +1354,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function landAsync(c::VehicleClient, timeout_sec=60, vehicle_name="")
+function landAsync(c::VehicleClient, timeout_sec=60, vehicle_name::String="")
 return call_async(c, "land", timeout_sec, vehicle_name)
 end
 
@@ -1366,9 +1368,9 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function goHomeAsync(c::VehicleClient, timeout_sec=3e+38, vehicle_name="")
+function goHomeAsync(c::VehicleClient, timeout_sec=3e+38, vehicle_name::String="")
 return call_async(c, "goHome", timeout_sec, vehicle_name)
-
+end
 #APIs for controlend
 
 """
@@ -1384,7 +1386,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByVelocityBodyFrameAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+function moveByVelocityBodyFrameAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name::String="")
 return call_async(c, "moveByVelocityBodyFrame", vx, vy, vz, duration, drivetrain, yaw_mode, vehicle_name)
 end
 
@@ -1401,17 +1403,17 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByVelocityZBodyFrameAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+function moveByVelocityZBodyFrameAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name::String="")
 
 return call_async(c, "moveByVelocityZBodyFrame", vx, vy, z, duration, drivetrain, yaw_mode, vehicle_name)
 end
 
-function moveByAngleZAsync(c::VehicleClient, pitch, roll, z, yaw, duration, vehicle_name="")
+function moveByAngleZAsync(c::VehicleClient, pitch, roll, z, yaw, duration, vehicle_name::String="")
 logging.warning("moveByAngleZAsync API is deprecated, use moveByRollPitchYawZAsync() API instead")
 return call_async(c, "moveByRollPitchYawZ", roll, -pitch, -yaw, z, duration, vehicle_name)
 end
 
-function moveByAngleThrottleAsync(c::VehicleClient, pitch, roll, throttle, yaw_rate, duration, vehicle_name="")
+function moveByAngleThrottleAsync(c::VehicleClient, pitch, roll, throttle, yaw_rate, duration, vehicle_name::String="")
 logging.warning("moveByAngleThrottleAsync API is deprecated, use moveByRollPitchYawrateThrottleAsync() API instead")
 return call_async(c, "moveByRollPitchYawrateThrottle", roll, -pitch, -yaw_rate, throttle, duration, vehicle_name)
 end
@@ -1429,11 +1431,11 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByVelocityAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+function moveByVelocityAsync(c::VehicleClient, vx, vy, vz, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name::String="")
 return call_async(c, "moveByVelocity", vx, vy, vz, duration, drivetrain, yaw_mode, vehicle_name)
 end
 
-function moveByVelocityZAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+function moveByVelocityZAsync(c::VehicleClient, vx, vy, z, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name::String="")
 return call_async(c, "moveByVelocityZ", vx, vy, z, duration, drivetrain, yaw_mode, vehicle_name)
 end
 
@@ -1452,7 +1454,7 @@ function moveToGPSAsync(c::VehicleClient, latitude, longitude, altitude, velocit
 return call_async(c, "moveToGPS", latitude, longitude, altitude, velocity, timeout_sec, drivetrain, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
 end
 
-function moveToZAsync(c::VehicleClient, z, velocity, timeout_sec=3e+38, yaw_mode=YawMode(), lookahead=-1, adaptive_lookahead=1, vehicle_name="")
+function moveToZAsync(c::VehicleClient, z, velocity, timeout_sec=3e+38, yaw_mode=YawMode(), lookahead=-1, adaptive_lookahead=1, vehicle_name::String="")
 return call_async(c, "moveToZ", z, velocity, timeout_sec, yaw_mode, lookahead, adaptive_lookahead, vehicle_name)
 end
 
@@ -1469,30 +1471,30 @@ Args:
     z_min (float): min z allowed for vehicle position
     duration (float): after this duration vehicle would switch back to non-manual mode
     drivetrain (DrivetrainType): when ForwardOnly, vehicle rotates itself so that its front is always facing the direction of travel. If MaxDegreeOfFreedom then it doesn't do that (crab-like movement)
-    yaw_mode (YawMode): Specifies if vehicle should face at given angle (is_rate=False) or should be rotating around its axis at given rate (is_rate=True)
+    yaw_mode (YawMode): Specifies if vehicle should face at given angle (is_rate=false) or should be rotating around its axis at given rate (is_rate=True)
     vehicle_name (str, optional): Name of the multirotor to send this command to
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByManualAsync(c::VehicleClient, vx_max, vy_max, z_min, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name="")
+function moveByManualAsync(c::VehicleClient, vx_max, vy_max, z_min, duration, drivetrain=DrivetrainType.MaxDegreeOfFreedom, yaw_mode=YawMode(), vehicle_name::String="")
 return call_async(c, "moveByManual", vx_max, vy_max, z_min, duration, drivetrain, yaw_mode, vehicle_name)
 end
 
-function rotateToYawAsync(c::VehicleClient, yaw, timeout_sec=3e+38, margin=5, vehicle_name="")
+function rotateToYawAsync(c::VehicleClient, yaw, timeout_sec=3e+38, margin=5, vehicle_name::String="")
 return call_async(c, "rotateToYaw", yaw, timeout_sec, margin, vehicle_name)
 end
 
-function rotateByYawRateAsync(c::VehicleClient, yaw_rate, duration, vehicle_name="")
+function rotateByYawRateAsync(c::VehicleClient, yaw_rate, duration, vehicle_name::String="")
 return call_async(c, "rotateByYawRate", yaw_rate, duration, vehicle_name)
 end
 
-function hoverAsync(c::VehicleClient, vehicle_name="")
+function hoverAsync(c::VehicleClient, vehicle_name::String="")
 return call_async(c, "hover", vehicle_name)
 end
 
-function moveByRC(c::VehicleClient, rcdata=RCData(), vehicle_name="")
+function moveByRC(c::VehicleClient, rcdata=RCData(), vehicle_name::String="")
 return call(c, "moveByRC", rcdata, vehicle_name)
-
+end
 #low - level control APIend
 
 """
@@ -1508,7 +1510,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByMotorPWMsAsync(c::VehicleClient, front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name="")
+function moveByMotorPWMsAsync(c::VehicleClient, front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name::String="")
 return call_async(c, "moveByMotorPWMs", front_right_pwm, rear_left_pwm, front_left_pwm, rear_right_pwm, duration, vehicle_name)
 end
 
@@ -1544,7 +1546,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByRollPitchYawZAsync(c::VehicleClient, roll, pitch, yaw, z, duration, vehicle_name="")
+function moveByRollPitchYawZAsync(c::VehicleClient, roll, pitch, yaw, z, duration, vehicle_name::String="")
 return call_async(c, "moveByRollPitchYawZ", roll, -pitch, -yaw, z, duration, vehicle_name)
 end
 
@@ -1580,7 +1582,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByRollPitchYawThrottleAsync(c::VehicleClient, roll, pitch, yaw, throttle, duration, vehicle_name="")
+function moveByRollPitchYawThrottleAsync(c::VehicleClient, roll, pitch, yaw, throttle, duration, vehicle_name::String="")
 return call_async(c, "moveByRollPitchYawThrottle", roll, -pitch, -yaw, throttle, duration, vehicle_name)
 end
 
@@ -1616,7 +1618,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByRollPitchYawrateThrottleAsync(c::VehicleClient, roll, pitch, yaw_rate, throttle, duration, vehicle_name="")
+function moveByRollPitchYawrateThrottleAsync(c::VehicleClient, roll, pitch, yaw_rate, throttle, duration, vehicle_name::String="")
 return call_async(c, "moveByRollPitchYawrateThrottle", roll, -pitch, -yaw_rate, throttle, duration, vehicle_name)
 end
 
@@ -1652,7 +1654,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByRollPitchYawrateZAsync(c::VehicleClient, roll, pitch, yaw_rate, z, duration, vehicle_name="")
+function moveByRollPitchYawrateZAsync(c::VehicleClient, roll, pitch, yaw_rate, z, duration, vehicle_name::String="")
 return call_async(c, "moveByRollPitchYawrateZ", roll, -pitch, -yaw_rate, z, duration, vehicle_name)
 end
 
@@ -1688,7 +1690,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByAngleRatesZAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, z, duration, vehicle_name="")
+function moveByAngleRatesZAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, z, duration, vehicle_name::String="")
 return call_async(c, "moveByAngleRatesZ", roll_rate, -pitch_rate, -yaw_rate, z, duration, vehicle_name)
 end
 
@@ -1724,7 +1726,7 @@ Args:
 Returns:
     msgpackrpc.future.Future: future. call .join() to wait for method to finish. Example: client.METHOD().join()
 """
-function moveByAngleRatesThrottleAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, throttle, duration, vehicle_name="")
+function moveByAngleRatesThrottleAsync(c::VehicleClient, roll_rate, pitch_rate, yaw_rate, throttle, duration, vehicle_name::String="")
 return call_async(c, "moveByAngleRatesThrottle", roll_rate, -pitch_rate, -yaw_rate, throttle, duration, vehicle_name)
 end
 
@@ -1740,7 +1742,7 @@ Args:
         - Pass AngleRateControllerGains() to reset gains to default recommended values.
     vehicle_name (str, optional): Name of the multirotor to send this command to
 """
-function setAngleRateControllerGains(c::VehicleClient, angle_rate_gains=AngleRateControllerGains(), vehicle_name="")
+function setAngleRateControllerGains(c::VehicleClient, angle_rate_gains=AngleRateControllerGains(), vehicle_name::String="")
 call(c, "setAngleRateControllerGains", *(angle_rate_gains.to_lists()+(vehicle_name,)))
 end
 
@@ -1757,7 +1759,7 @@ Args:
         - Pass AngleLevelControllerGains() to reset gains to default recommended values.
     vehicle_name (str, optional): Name of the multirotor to send this command to
 """
-function setAngleLevelControllerGains(c::VehicleClient, angle_level_gains=AngleLevelControllerGains(), vehicle_name="")
+function setAngleLevelControllerGains(c::VehicleClient, angle_level_gains=AngleLevelControllerGains(), vehicle_name::String="")
 call(c, "setAngleLevelControllerGains", *(angle_level_gains.to_lists()+(vehicle_name,)))
 end
 
@@ -1773,7 +1775,7 @@ Args:
         - Modifying velocity controller gains will have an affect on the behaviour of moveOnSplineAsync() and moveOnSplineVelConstraintsAsync(), as they both use velocity control to track the trajectory.
     vehicle_name (str, optional): Name of the multirotor to send this command to
 """
-function setVelocityControllerGains(c::VehicleClient, velocity_gains=VelocityControllerGains(), vehicle_name="")
+function setVelocityControllerGains(c::VehicleClient, velocity_gains=VelocityControllerGains(), vehicle_name::String="")
 call(c, "setVelocityControllerGains", *(velocity_gains.to_lists()+(vehicle_name,)))
 
 end
@@ -1788,9 +1790,9 @@ Args:
         - Pass PositionControllerGains() to reset gains to default recommended values.
     vehicle_name (str, optional): Name of the multirotor to send this command to
 """
-function setPositionControllerGains(c::VehicleClient, position_gains=PositionControllerGains(), vehicle_name="")
+function setPositionControllerGains(c::VehicleClient, position_gains=PositionControllerGains(), vehicle_name::String="")
 call(c, "setPositionControllerGains", *(position_gains.to_lists()+(vehicle_name,)))
-
+end
 #query vehicle stateend
 
 """
@@ -1802,8 +1804,9 @@ Args:
 Returns:
     MultirotorState:
 """
-function getMultirotorState(c::VehicleClient, vehicle_name="")
+function getMultirotorState(c::VehicleClient, vehicle_name::String="")
 return MultirotorState.from_msgpack(call(c, "getMultirotorState", vehicle_name))
+end
 #query rotor statesend
 
 """
@@ -1816,8 +1819,9 @@ Args:
 Returns:
     RotorStates: Containing a timestamp and the speed, thrust and torque of all rotors.
 """
-function getRotorStates(c::VehicleClient, vehicle_name="")
+function getRotorStates(c::VehicleClient, vehicle_name::String="")
 return RotorStates.from_msgpack(call(c, "getRotorStates", vehicle_name))
+end
 
 #----------------------------------- Car APIs ---------------------------------------------
 struct CarClient
@@ -1834,7 +1838,7 @@ Args:
     controls (CarControls): Struct containing control values
     vehicle_name (str, optional): Name of vehicle to be controlled
 """
-function setCarControls(c::VehicleClient, controls, vehicle_name="")
+function setCarControls(c::VehicleClient, controls, vehicle_name::String="")
 call(c, "setCarControls", controls, vehicle_name)
 end
 
@@ -1847,7 +1851,7 @@ Args:
 Returns:
     CarState:
 """
-function getCarState(c::VehicleClient, vehicle_name="")
+function getCarState(c::VehicleClient, vehicle_name::String="")
 state_raw = call(c, "getCarState", vehicle_name)
 return CarState.from_msgpack(state_raw)
 end
@@ -1859,6 +1863,7 @@ Args:
 Returns:
     CarControls:
 """
-function getCarControls(c::VehicleClient, vehicle_name="")
+function getCarControls(c::VehicleClient, vehicle_name::String="")
 controls_raw = call(c, "getCarControls", vehicle_name)
 return CarControls.from_msgpack(controls_raw)
+end
