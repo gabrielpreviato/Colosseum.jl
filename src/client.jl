@@ -20,7 +20,7 @@ end
 
 function call(c::AbstractVehicleClient, method::String, args...; idx::UInt8=0x00, T::Type=Any)
     bytes = pack(c.client, [0x00, idx, method, [args...]])
-    msg = unpack(c.client, T)
+    msg = unpack(c.client)
 
     if msg[1] != RESPONSE
         throw("call to method $method didn't return a RESPONSE")
@@ -30,7 +30,7 @@ function call(c::AbstractVehicleClient, method::String, args...; idx::UInt8=0x00
         throw(msg[3])
     end
 
-    println(msg[1:3])
+    # println(msg[1:3])
 
     return msg[4]
 end
@@ -255,7 +255,7 @@ end
     Returns:
         bool: True if material was set
     """
-function simSetObjectMaterial(c::AbstractVehicleClient, object_name, material_name, component_id=0)
+function simSetObjectMaterial(c::AbstractVehicleClient, object_name::String, material_name, component_id=0)
     
     return call(c, "simSetObjectMaterial", object_name, material_name, component_id)
 end
@@ -271,7 +271,7 @@ end
     Returns:
         bool: True if material was set
     """
-function simSetObjectMaterialFromTexture(c::AbstractVehicleClient, object_name, texture_path, component_id=0)
+function simSetObjectMaterialFromTexture(c::AbstractVehicleClient, object_name::String, texture_path, component_id=0)
     
     return call(c, "simSetObjectMaterialFromTexture", object_name, texture_path, component_id)
 end
@@ -550,7 +550,7 @@ end
         ignore_collision (bool) Whether to ignore any collision || not
         vehicle_name (str, optional) Name of the vehicle to move
     """
-function simSetVehiclePose(c::AbstractVehicleClient, pose, ignore_collision, vehicle_name::String="")
+function simSetVehiclePose(c::AbstractVehicleClient, pose::Pose, ignore_collision::Bool, vehicle_name::String="")
     
     call(c, "simSetVehiclePose", pose, ignore_collision, vehicle_name)
 end
@@ -566,8 +566,8 @@ end
     """
 function simGetVehiclePose(c::AbstractVehicleClient, vehicle_name::String="")
     
-    pose = call(c, "simGetVehiclePose", vehicle_name)
-    return Pose.from_msgpack(pose)
+    pose = Pose(call(c, "simGetVehiclePose", vehicle_name))
+    return pose
 end
 
 """
@@ -595,7 +595,7 @@ end
     Returns:
         Pose:
     """
-function simGetObjectPose(c::AbstractVehicleClient, object_name)
+function simGetObjectPose(c::AbstractVehicleClient, object_name::String)
     
     pose = call(c, "simGetObjectPose", object_name)
     return Pose.from_msgpack(pose)
@@ -605,8 +605,7 @@ end
 """
     Set the pose of the object(actor) in the environment
 
-    The specified actor must have Mobility set to movable, otherwise there will be unend
-functionined behaviour.
+    The specified actor must have Mobility set to movable, otherwise there will be undefined behaviour.
     See https://www.unrealengine.com/en-US/blog/moving-physical-objects for details on how to set Mobility and the effect of Teleport parameter
 
     Args:
@@ -617,7 +616,7 @@ functionined behaviour.
     Returns:
         bool: If the move was successful
     """
-function simSetObjectPose(c::AbstractVehicleClient, object_name, pose, teleport=True)
+function simSetObjectPose(c::AbstractVehicleClient, object_name::String, pose::Pose, teleport::Bool=true)
     
     return call(c, "simSetObjectPose", object_name, pose, teleport)
 
@@ -632,7 +631,7 @@ end
     Returns:
         airsim.Vector3r: Scale
     """
-function simGetObjectScale(c::AbstractVehicleClient, object_name)
+function simGetObjectScale(c::AbstractVehicleClient, object_name::String)
     
     scale = call(c, "simGetObjectScale", object_name)
     return Vector3r.from_msgpack(scale)
@@ -649,7 +648,7 @@ end
     Returns:
         bool: True if scale change was successful
     """
-function simSetObjectScale(c::AbstractVehicleClient, object_name, scale_vector)
+function simSetObjectScale(c::AbstractVehicleClient, object_name::String, scale_vector::Vector3r)
     
     return call(c, "simSetObjectScale", object_name, scale_vector)
 
@@ -667,7 +666,7 @@ functionault behaviour is to list all objects, regex can be used to return small
     Returns:
         list[str]: List containing all the names
     """
-function simListSceneObjects(c::AbstractVehicleClient, name_regex=".*")
+function simListSceneObjects(c::AbstractVehicleClient, name_regex::String=".*")
     
     return call(c, "simListSceneObjects", name_regex)
 
@@ -682,7 +681,7 @@ end
     Returns:
         bool: True if the level was successfully loaded
     """
-function simLoadLevel(c::AbstractVehicleClient, level_name)
+function simLoadLevel(c::AbstractVehicleClient, level_name::String)
     
     return call(c, "simLoadLevel", level_name)
 
@@ -713,7 +712,7 @@ end
     Returns:
         str: Name of spawned object, in case it had to be modified
     """
-function simSpawnObject(c::AbstractVehicleClient, object_name, asset_name, pose, scale, physics_enabled=false, is_blueprint=false)
+function simSpawnObject(c::AbstractVehicleClient, object_name::String, asset_name::String, pose::Pose, scale::Vector3r, physics_enabled::Bool=false, is_blueprint::Bool=false)
     
     return call(c, "simSpawnObject", object_name, asset_name, pose, scale, physics_enabled, is_blueprint)
 
@@ -727,10 +726,8 @@ end
     Returns:
         bool: True if object is queued up for removal
     """
-function simDestroyObject(c::AbstractVehicleClient, object_name)
-    
+function simDestroyObject(c::AbstractVehicleClient, object_name::String)
     return call(c, "simDestroyObject", object_name)
-
 end
 
 """
@@ -748,10 +745,8 @@ end
     Returns:
         bool: If the mesh was found
     """
-function simSetSegmentationObjectID(c::AbstractVehicleClient, mesh_name, object_id, is_name_regex=false)
-    
+function simSetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String, object_id::Int, is_name_regex::Bool=false)
     return call(c, "simSetSegmentationObjectID", mesh_name, object_id, is_name_regex)
-
 end
 
 """
@@ -762,10 +757,8 @@ end
     Args:
         mesh_name (str) Name of the mesh to get the ID of
     """
-function simGetSegmentationObjectID(c::AbstractVehicleClient, mesh_name)
-    
+function simGetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String)
     return call(c, "simGetSegmentationObjectID", mesh_name)
-
 end
 
 """
@@ -781,10 +774,8 @@ end
         external (bool, optional) Whether the camera is an External Camera
 
     """
-function simAddDetectionFilterMeshName(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, mesh_name, vehicle_name::String="", external::Bool=false)
-    
+function simAddDetectionFilterMeshName(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, mesh_name::String, vehicle_name::String="", external::Bool=false)
     call(c, "simAddDetectionFilterMeshName", camera_name, image_type, mesh_name, vehicle_name, external)
-
 end
 
 """
@@ -797,10 +788,8 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDetectionFilterRadius(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, radius_cm, vehicle_name::String="", external::Bool=false)
-    
+function simSetDetectionFilterRadius(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, radius_cm::Int, vehicle_name::String="", external::Bool=false)
     call(c, "simSetDetectionFilterRadius", camera_name, image_type, radius_cm, vehicle_name, external)
-
 end
 
 """
@@ -814,9 +803,7 @@ end
 
     """
 function simClearDetectionMeshNames(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, vehicle_name::String="", external::Bool=false)
-    
     call(c, "simClearDetectionMeshNames", camera_name, image_type, vehicle_name, external)
-
 end
 
 """
@@ -832,10 +819,8 @@ end
         DetectionInfo array
     """
 function simGetDetections(c::AbstractVehicleClient, camera_name::String, image_type::ImageType, vehicle_name::String="", external::Bool=false)
-    
     responses_raw = call(c, "simGetDetections", camera_name, image_type, vehicle_name, external)
-    return [DetectionInfo.from_msgpack(response_raw) for response_raw in responses_raw]
-
+    return [DetectionInfo(response_raw) for response_raw in responses_raw]
 end
 
 """
@@ -852,10 +837,8 @@ end
         message_param (str, optional) Parameter to be printed next to the message
         severity (int, optional) Range 0-3, inclusive, corresponding to the severity of the message
     """
-function simPrintLogMessage(c::AbstractVehicleClient, message, message_param="", severity=0)
-    
+function simPrintLogMessage(c::AbstractVehicleClient, message::String, message_param::String="", severity::Int=0) 
     call(c, "simPrintLogMessage", message, message_param, severity)
-
 end
 
 """
@@ -870,10 +853,7 @@ end
         CameraInfo:
     """
 function simGetCameraInfo(c::AbstractVehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)
-    
-#TODO : below str() conversion is only needed for legacy reason and should be removed in future
-    return CameraInfo.from_msgpack(call(c, "simGetCameraInfo", str(camera_name), vehicle_name, external))
-
+    return CameraInfo(call(c, "simGetCameraInfo", camera_name, vehicle_name, external))
 end
 
 """
@@ -888,10 +868,7 @@ end
         List (float) List of distortion parameter values corresponding to K1, K2, K3, P1, P2 respectively.
     """
 function simGetDistortionParams(c::AbstractVehicleClient, camera_name::String, vehicle_name::String="", external::Bool=false)
-    
-
-    return call(c, "simGetDistortionParams", str(camera_name), vehicle_name, external)
-
+    return call(c, "simGetDistortionParams", camera_name, vehicle_name, external)
 end
 
 """
@@ -904,11 +881,9 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDistortionParams(c::AbstractVehicleClient, camera_name::String, distortion_params, vehicle_name::String="", external::Bool=false)
-    
-
+function simSetDistortionParams(c::AbstractVehicleClient, camera_name::String, distortion_params::Dict, vehicle_name::String="", external::Bool=false)
     for (param_name, value) in items(distortion_params)
-        c::AbstractVehicleClient.simSetDistortionParam(camera_name, param_name, value, vehicle_name, external)
+        simSetDistortionParam(c, camera_name, param_name, value, vehicle_name, external)
     end
 end
 
@@ -922,9 +897,8 @@ end
         vehicle_name (str, optional) Vehicle which the camera is associated with
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetDistortionParam(c::AbstractVehicleClient, camera_name::String, param_name, value, vehicle_name::String="", external::Bool=false)
-    
-    call(c, "simSetDistortionParam", str(camera_name), param_name, value, vehicle_name, external)
+function simSetDistortionParam(c::AbstractVehicleClient, camera_name::String, param_name::String, value::Real, vehicle_name::String="", external::Bool=false)
+    call(c, "simSetDistortionParam", camera_name, param_name, value, vehicle_name, external)
 end
 
 """
@@ -936,10 +910,8 @@ end
         vehicle_name (str, optional) Name of vehicle which the camera corresponds to
         external (bool, optional) Whether the camera is an External Camera
     """
-function simSetCameraPose(c::AbstractVehicleClient, camera_name::String, pose, vehicle_name::String="", external::Bool=false)
-    
-#TODO : below str() conversion is only needed for legacy reason and should be removed in future
-    call(c, "simSetCameraPose", str(camera_name), pose, vehicle_name, external)
+function simSetCameraPose(c::AbstractVehicleClient, camera_name::String, pose::Pose, vehicle_name::String="", external::Bool=false)
+    call(c, "simSetCameraPose", camera_name, pose, vehicle_name, external)
 end
 
 """
@@ -952,9 +924,7 @@ end
         external (bool, optional) Whether the camera is an External Camera
     """
 function simSetCameraFov(c::AbstractVehicleClient, camera_name::String, fov_degrees, vehicle_name::String="", external::Bool=false)
-    
-#TODO : below str() conversion is only needed for legacy reason and should be removed in future
-    call(c, "simSetCameraFov", str(camera_name), fov_degrees, vehicle_name, external)
+    call(c, "simSetCameraFov", camera_name, fov_degrees, vehicle_name, external)
 end
 
 
@@ -975,7 +945,7 @@ Returns:
 """
 function simGetGroundTruthKinematics(c::AbstractVehicleClient, vehicle_name::String="")
     kinematics_state = call(c, "simGetGroundTruthKinematics", vehicle_name)
-    return KinematicsState.from_msgpack(kinematics_state)
+    return KinematicsState(kinematics_state)
 end
 
 """
@@ -988,7 +958,7 @@ Args:
     ignore_collision (bool): Whether to ignore any collision or not
     vehicle_name (str, optional): Name of the vehicle to move
 """
-function simSetKinematics(c::AbstractVehicleClient, state, ignore_collision, vehicle_name::String="")
+function simSetKinematics(c::AbstractVehicleClient, state, ignore_collision::Bool, vehicle_name::String="")
     call(c, "simSetKinematics", state, ignore_collision, vehicle_name)
 end
 
@@ -1005,7 +975,7 @@ Returns:
 """
 function simGetGroundTruthEnvironment(c::AbstractVehicleClient, vehicle_name::String="")
     env_state = call(c, "simGetGroundTruthEnvironment", vehicle_name)
-    return EnvironmentState.from_msgpack(env_state)
+    return EnvironmentState(env_state)
 end
 
 
@@ -1019,8 +989,8 @@ Args:
 Returns:
     ImuData:
 """
-function getImuData(c::AbstractVehicleClient, imu_name="', vehicle_name='")
-return ImuData.from_msgpack(call(c, "getImuData", imu_name, vehicle_name))
+function getImuData(c::AbstractVehicleClient, imu_name::String="", vehicle_name::String="")
+    return ImuData(call(c, "getImuData", imu_name, vehicle_name))
 end
 
 """
@@ -1031,8 +1001,8 @@ Args:
 Returns:
     BarometerData:
 """
-function getBarometerData(c::AbstractVehicleClient, barometer_name="', vehicle_name='")
-return BarometerData.from_msgpack(call(c, "getBarometerData", barometer_name, vehicle_name))
+function getBarometerData(c::AbstractVehicleClient, barometer_name::String="", vehicle_name::String="")
+    return BarometerData(call(c, "getBarometerData", barometer_name, vehicle_name))
 end
 
 """
@@ -1043,8 +1013,8 @@ Args:
 Returns:
     MagnetometerData:
 """
-function getMagnetometerData(c::AbstractVehicleClient, magnetometer_name="', vehicle_name='")
-return MagnetometerData.from_msgpack(call(c, "getMagnetometerData", magnetometer_name, vehicle_name))
+function getMagnetometerData(c::AbstractVehicleClient, magnetometer_name::String="", vehicle_name::String="")
+    return MagnetometerData(call(c, "getMagnetometerData", magnetometer_name, vehicle_name))
 end
 
 """
@@ -1055,8 +1025,8 @@ Args:
 Returns:
     GpsData:
 """
-function getGpsData(c::AbstractVehicleClient, gps_name="', vehicle_name='")
-return GpsData.from_msgpack(call(c, "getGpsData", gps_name, vehicle_name))
+function getGpsData(c::AbstractVehicleClient, gps_name=::String="", vehicle_name::String="")
+    return GpsData(call(c, "getGpsData", gps_name, vehicle_name))
 end
 
 """
@@ -1067,8 +1037,8 @@ Args:
 Returns:
     DistanceSensorData:
 """
-function getDistanceSensorData(c::AbstractVehicleClient, distance_sensor_name="', vehicle_name='")
-return DistanceSensorData.from_msgpack(call(c, "getDistanceSensorData", distance_sensor_name, vehicle_name))
+function getDistanceSensorData(c::AbstractVehicleClient, distance_sensor_name::String="", vehicle_name::String="")
+    return DistanceSensorData(call(c, "getDistanceSensorData", distance_sensor_name, vehicle_name))
 end
 
 """
@@ -1079,8 +1049,8 @@ Args:
 Returns:
     LidarData:
 """
-function getLidarData(c::AbstractVehicleClient, lidar_name="', vehicle_name='")
-return LidarData.from_msgpack(call(c, "getLidarData", lidar_name, vehicle_name))
+function getLidarData(c::AbstractVehicleClient, lidar_name::String="", vehicle_name::String="")
+    return LidarData(call(c, "getLidarData", lidar_name, vehicle_name))
 end
 
 """
@@ -1094,9 +1064,9 @@ Args:
 Returns:
     list[int]: Segmentation IDs of the objects
 """
-function simGetLidarSegmentation(c::AbstractVehicleClient, lidar_name="', vehicle_name='")
-logging.warning("simGetLidarSegmentation API is deprecated, use getLidarData() API instead")
-return self.getLidarData(lidar_name, vehicle_name).segmentation
+function simGetLidarSegmentation(c::AbstractVehicleClient, lidar_name::String="", vehicle_name::String="")
+    logging.warning("simGetLidarSegmentation API is deprecated, use getLidarData() API instead")
+    return getLidarData(c, lidar_name, vehicle_name).segmentation
 end
 
 #Plotting APIsend
@@ -1289,7 +1259,7 @@ Args:
 Returns:
     bool: Whether vehicle was created
 """
-function simAddVehicle(c::AbstractVehicleClient, vehicle_name, vehicle_type, pose, pawn_path="")
+function simAddVehicle(c::AbstractVehicleClient, vehicle_name, vehicle_type, pose::Pose, pawn_path="")
 return call(c, "simAddVehicle", vehicle_name, vehicle_type, pose, pawn_path)
 end
 
