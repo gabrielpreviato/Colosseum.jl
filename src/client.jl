@@ -583,39 +583,27 @@ function simSetTraceLine(c::AbstractVehicleClient, color_rgba, thickness=1.0, ve
 end
 
 """
-    The position inside the returned Pose is in the world frame
+    simGetObjectPose(c::AbstractVehicleClient, object_name::String)::Pose
 
-    Args:
-        object_name (str) Object to get the Pose of
-
-    Returns:
-        Pose:
-    """
+Returns the object/actor [`Pose`](@ref) in the world frame.
+"""
 function simGetObjectPose(c::AbstractVehicleClient, object_name::String)
-    
     pose = call(c, "simGetObjectPose", object_name)
-    return Pose.from_msgpack(pose)
-
+    return Pose(pose)
 end
 
 """
-    Set the pose of the object(actor) in the environment
+    simSetObjectPose(c::AbstractVehicleClient, object_name::String, pose::Pose, teleport::Bool=true)::Bool
 
-    The specified actor must have Mobility set to movable, otherwise there will be undefined behaviour.
-    See https://www.unrealengine.com/en-US/blog/moving-physical-objects for details on how to set Mobility and the effect of Teleport parameter
+Set the [`Pose`](@ref) of the object/actor in the environment.
 
-    Args:
-        object_name (str) Name of the object(actor) to move
-        pose (Pose) Desired Pose of the object
-        teleport (bool, optional) Whether to move the object immediately without affecting their velocity
+The specified actor must have Mobility set to movable, otherwise there will be undefined behaviour.
+See https://www.unrealengine.com/en-US/blog/moving-physical-objects for details on how to set Mobility and the effect of Teleport parameter.
 
-    Returns:
-        bool: If the move was successful
-    """
+Returns `true` if the change was successful, `false` otherwise.
+"""
 function simSetObjectPose(c::AbstractVehicleClient, object_name::String, pose::Pose, teleport::Bool=true)
-    
     return call(c, "simSetObjectPose", object_name, pose, teleport)
-
 end
 
 """
