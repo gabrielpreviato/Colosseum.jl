@@ -14,7 +14,6 @@ end
 
 function VehicleClient(ip::String="127.0.0.1", port::Int=41451)
     client = connect(ip, port)
-
     VehicleClient(client)
 end
 
@@ -38,24 +37,22 @@ end
 #----------------------------------- Common vehicle APIs ---------------------------------------------
 
 """
-        reset(c::AbstractVehicleClient)
-    
-    Reset the vehicle to its original starting state
+    reset(c::AbstractVehicleClient)::Nothing
 
-    Note that you must call `enableApiControl` and `armDisarm` again after the call to reset
-    """
+Reset the vehicle to its original starting state
+
+Note that you must call `enableApiControl` and `armDisarm` again after the call to reset
+"""
 function reset(c::AbstractVehicleClient)::Nothing
-    
     call(c, "reset")
 end
 
 """
-        ping(c::AbstractVehicleClient)
+    ping(c::AbstractVehicleClient)::Bool
 
-    If connection is established then this call will return true otherwise it will be blocked until timeout
-    """
+If connection is established then this call will return true otherwise it will be blocked until timeout
+"""
 function ping(c::AbstractVehicleClient)::Bool
-    
     call(c, "ping")
 end
 
@@ -295,30 +292,29 @@ end
         move_sun (bool, optional) Whether || not to move the Sun
     """
 function simSetTimeOfDay(c::AbstractVehicleClient, is_enabled::Bool, start_datetime::String="", is_start_datetime_dst::Bool=false, celestial_clock_speed::Int=1, update_interval_secs::Int=60, move_sun::Bool=true)
-    
     call(c, "simSetTimeOfDay", is_enabled, start_datetime, is_start_datetime_dst, celestial_clock_speed, update_interval_secs, move_sun)
 end
 
 #weather
 """
-    Enable Weather effects. Needs to be called before using `simSetWeatherParameter` API
+Enable Weather effects. Needs to be called before using `simSetWeatherParameter` API
 
-    Args:
-        enable (bool) True to enable, false to disable
-    """
+Args:
+    enable (bool) True to enable, false to disable
+"""
 function simEnableWeather(c::AbstractVehicleClient, enable::Bool)
     
     call(c, "simEnableWeather", enable)
 end
 
 """
-    Enable various weather effects
+Enable various weather effects
 
-    Args:
-        param (WeatherParameter) Weather effect to be enabled
-        val (float) Intensity of the effect, Range 0-1
-    """
-function simSetWeatherParameter(c::AbstractVehicleClient, param, val::Real)
+Args:
+    param (WeatherParameter) Weather effect to be enabled
+    val (float) Intensity of the effect, Range 0-1
+"""
+function simSetWeatherParameter(c::AbstractVehicleClient, param::WeatherParameter, val::Real)
     
     call(c, "simSetWeatherParameter", param, val)
 end
@@ -327,18 +323,18 @@ end
 #simGetImage returns compressed png in array of bytes
 #image_type uses one of the ImageType members
 """
-    Get a single image
-    Returns bytes of png format image which can be dumped into abinary file to create .png image
-    `string_to_uint8_array()` can be used to convert into Numpy unit8 array
-    See https://microsoft.github.io/AirSim/image_apis/ for details
-    Args:
-        camera_name (str) Name of the camera, for backwards compatibility, ID numbers such as 0,1,etc. can also be used
-        image_type (ImageType) Type of image required
-        vehicle_name (str, optional) Name of the vehicle with the camera
-        external (bool, optional) Whether the camera is an External Camera
-    Returns:
-        Binary string literal of compressed png image
-    """
+Get a single image
+Returns bytes of png format image which can be dumped into abinary file to create .png image
+`string_to_uint8_array()` can be used to convert into Numpy unit8 array
+See https://microsoft.github.io/AirSim/image_apis/ for details
+Args:
+    camera_name (str) Name of the camera, for backwards compatibility, ID numbers such as 0,1,etc. can also be used
+    image_type (ImageType) Type of image required
+    vehicle_name (str, optional) Name of the vehicle with the camera
+    external (bool, optional) Whether the camera is an External Camera
+Returns:
+    Binary string literal of compressed png image
+"""
 function simGetImage(c::AbstractVehicleClient, camera_name::Union{String,Int}, image_type::ImageType, vehicle_name::String="", external::Bool=false)
     #because this method returns std::vector < uint8>, msgpack decides to encode it as a string unfortunately.
     result = call(c, "simGetImage", camera_name, image_type, vehicle_name, external)
@@ -353,18 +349,18 @@ end
 #simGetImage returns compressed png in array of bytes
 #image_type uses one of the ImageType members
 """
-    Get multiple images
+Get multiple images
 
-    See https://microsoft.github.io/AirSim/image_apis/ for details and examples
+See https://microsoft.github.io/AirSim/image_apis/ for details and examples
 
-    Args:
-        requests (list[ImageRequest]) Images required
-        vehicle_name (str, optional) Name of vehicle associated with the camera
-        external (bool, optional) Whether the camera is an External Camera
+Args:
+    requests (list[ImageRequest]) Images required
+    vehicle_name (str, optional) Name of vehicle associated with the camera
+    external (bool, optional) Whether the camera is an External Camera
 
-    Returns:
-        list[ImageResponse]:
-    """
+Returns:
+    list[ImageResponse]:
+"""
 function simGetImages(c::AbstractVehicleClient, requests::Vector{ImageRequest}, vehicle_name::String="", external::Bool=false)
     responses_raw = call(c, "simGetImages", requests, vehicle_name, external; T=ImageResponse)
     return [response_raw for response_raw in responses_raw]
@@ -655,21 +651,13 @@ function simSetObjectScale(c::AbstractVehicleClient, object_name::String, scale_
 end
 
 """
-    Lists the objects present in the environment
+    simListSceneObjects(c::AbstractVehicleClient, name_regex::String=".*")::Vector{String}
 
-    end
-functionault behaviour is to list all objects, regex can be used to return smaller list of matching objects || actors
-
-    Args:
-        name_regex (str, optional) String to match actor names against, e.g. "Cylinder.*"
-
-    Returns:
-        list[str]: List containing all the names
-    """
+Lists the objects present in the environment.
+Default behaviour is to list all objects, regex can be used to return smaller list of matching objects and actors
+"""
 function simListSceneObjects(c::AbstractVehicleClient, name_regex::String=".*")
-    
     return call(c, "simListSceneObjects", name_regex)
-
 end
 
 """
@@ -731,32 +719,24 @@ function simDestroyObject(c::AbstractVehicleClient, object_name::String)
 end
 
 """
-    Set segmentation ID for specific objects
+    simSetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String, object_id::Int, is_name_regex::Bool=false)::Bool
+    
+Set segmentation ID for specific object given the mesh name or multiple objects given regex.
+See https://microsoft.github.io/AirSim/image_apis/#segmentation for details.
 
-    See https://microsoft.github.io/AirSim/image_apis/#segmentation for details
-
-    Args:
-        mesh_name (str) Name of the mesh to set the ID of (supports regex)
-        object_id (int) Object ID to be set, range 0-255
-
-                            RBG values for IDs can be seen at https://microsoft.github.io/AirSim/seg_rgbs.txt
-        is_name_regex (bool, optional) Whether the mesh name is a regex
-
-    Returns:
-        bool: If the mesh was found
-    """
+the function return true if the mesh was found, false otherwise.
+"""
 function simSetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String, object_id::Int, is_name_regex::Bool=false)
     return call(c, "simSetSegmentationObjectID", mesh_name, object_id, is_name_regex)
 end
 
 """
-    Returns Object ID for the given mesh name
+    simGetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String)::UInt8
 
-    Mapping of Object IDs to RGB values can be seen at https://microsoft.github.io/AirSim/seg_rgbs.txt
+Returns Object ID for the given mesh name, range 0-255
 
-    Args:
-        mesh_name (str) Name of the mesh to get the ID of
-    """
+Mapping of Object IDs to RGB values can be seen at https://microsoft.github.io/AirSim/seg_rgbs.txt
+"""
 function simGetSegmentationObjectID(c::AbstractVehicleClient, mesh_name::String)
     return call(c, "simGetSegmentationObjectID", mesh_name)
 end
@@ -1025,7 +1005,7 @@ Args:
 Returns:
     GpsData:
 """
-function getGpsData(c::AbstractVehicleClient, gps_name=::String="", vehicle_name::String="")
+function getGpsData(c::AbstractVehicleClient, gps_name::String="", vehicle_name::String="")
     return GpsData(call(c, "getGpsData", gps_name, vehicle_name))
 end
 
