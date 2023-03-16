@@ -43,6 +43,7 @@ end
 MsgPack.msgpack_type(::Type{Vector3r}) = MsgPack.StructType()
 
 Vector3r() = Vector3r(0.0, 0.0, 0.0)
+Vector3r(d::Dict{Any, Any}) = Vector3r(d["x_val"], d["y_val"], d["z_val"])
 
 function nanVector3r()
     Vector3r(NaN, NaN, NaN)
@@ -99,6 +100,7 @@ end
 MsgPack.msgpack_type(::Type{Quaternionr}) = MsgPack.StructType()
 
 Quaternionr() = Quaternionr(0.0, 0.0, 0.0, 0.0)
+Quaternionr(d::Dict{Any, Any}) = Quaternionr(d["x_val"], d["y_val"], d["z_val"], d["w_val"])
 
 function nanQuaternionr()
     Quaternionr(NaN, NaN, NaN, NaN)
@@ -181,6 +183,7 @@ end
 MsgPack.msgpack_type(::Type{Pose}) = MsgPack.StructType()
 
 Pose() = Pose(Vector3r(), Quaternionr())
+Pose(d::Dict{Any, Any}) = Pose(Vector3r(d["position"]), Quaternionr(d["orientation"]))
 
 function nanPose()
     Pose(nanVector3r(), nanQuaternionr())
