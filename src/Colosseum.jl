@@ -2,7 +2,9 @@ module Colosseum
 
 include("types.jl")
 
+include("utils.jl")
 
+export to_quaternion
 
 include("client.jl")
 
@@ -19,5 +21,4 @@ export call, reset, getClientVersion, getServerVersion, getMinRequiredServerVers
     simSpawnObject, simDestroyObject, simSetSegmentationObjectID, simGetSegmentationObjectID, simAddDetectionFilterMeshName,
     simSetDetectionFilterRadius, simClearDetectionMeshNames, simGetDetections, simPrintLogMessage, simGetCameraInfo,
     simGetDistortionParams, simSetDistortionParams, simSetDistortionParam, simSetCameraPose, simSetCameraFov
-
 end
